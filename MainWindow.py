@@ -16,16 +16,55 @@ class MainWindow(QMainWindow):
         self.gazeDetector = GazeDetector(self.haar_file_location_lineEdit.text())
         self.timer = QTimer(self)
 
+        self.currentFocus = 0
+        self.buttons = [self.b1_1, self.b1_2, self.b1_3,
+                        self.b2_1, self.b2_2, self.b2_3,
+                        self.b3_1, self.b3_2, self.b3_3]
+        for b in self.buttons:
+            b.setAutoDefault(True)
+
+        self.buttons[self.currentFocus].setFocus(True)
+
         self.timer.timeout.connect(self.updateFrame)
         self.timer.start(10)
 
-    def updateFrame(self):
-        img = self.gazeDetector.get_image()
+    def moveFocusRight(self):
+        self.currentFocus = (self.currentFocus + 1) % 8
+        self.buttons[self.currentFocus].setFocus(True)
+
+    def moveFocusLeft(self):
+        self.currentFocus = (self.currentFocus - 1) % 8
+        self.buttons[self.currentFocus].setFocus(True)
+
+    def moveFocusUp(self):
+        self.currentFocus = (self.currentFocus + 3) % 8
+        self.buttons[self.currentFocus].setFocus(True)
+
+    def moveFocusDown(self):
+        self.currentFocus = (self.currentFocus - 3) % 8
+        self.buttons[self.currentFocus].setFocus(True)
+
+    def updateImage(self, img):
         outImage = toQImage(img)
         outImage = outImage.rgbSwapped()
-
         self.main_image_label.setPixmap(QPixmap.fromImage(outImage))
         self.main_image_label.setScaledContents(True)
+
+    def updateImageInfo(self, dict):
+        val = "initial = " \
+              + str(dict["initial"]) \
+              + "\nCurrent = " \
+              + str(dict["current"]) \
+              + "\nDirection = " \
+              + str(dict["direction"]) \
+              + "\nAngle = " + str(dict["angle"])
+
+        self.image_info_textlabel.setText(val)
+
+    def updateFrame(self):
+        getDict = self.gazeDetector.get_image()
+        self.updateImage(getDict["image"])
+        self.updateImageInfo(getDict)
 
     def selectHaar(self):
         file = QFileDialog.getOpenFileName()

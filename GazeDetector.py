@@ -28,11 +28,11 @@ class GazeDetector:
             self.coordinate = [int(x + w / 2), int(y + h / 2)]
             cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 3)
 
-            print("-----")
-            print("initial = " + str(self.init))
-            print("current = " + str(self.coordinate))
-            print("direction = " + self.direction())
-            print("angle = " + self.getangle())
+            # print("-----")
+            # print("initial = " + str(self.init))
+            # print("current = " + str(self.coordinate))
+            # print("direction = " + self.direction())
+            # print("angle = " + self.getangle())
 
             font = cv2.FONT_HERSHEY_SIMPLEX
             bottomLeftCornerOfTextr = (200, 250)
@@ -65,7 +65,10 @@ class GazeDetector:
                                   fontColor,
                                   lineType)
 
-        return img
+        ret = {"image": img, "initial": self.init, "current": self.coordinate, "direction": self.direction(),
+               "angle": self.getangle()}
+
+        return ret
 
     def direction(self):
         ix = self.init[0]
