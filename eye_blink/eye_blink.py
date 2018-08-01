@@ -41,8 +41,8 @@ args = vars(ap.parse_args())
 # define two constants, one for the eye aspect ratio to indicate
 # blink and then a second constant for the number of consecutive
 # frames the eye must be below the threshold
-EYE_AR_THRESH = 0.26
-EYE_AR_CONSEC_FRAMES = 7
+EYE_AR_THRESH = 0.27
+EYE_AR_CONSEC_FRAMES = 6
 
 # initialize the frame counters and the total number of blinks
 COUNTER = 0
@@ -120,7 +120,7 @@ while True:
 		
 		# check to see if the eye aspect ratio is below the blink
 		# threshold, and if so, increment the blink frame counter
-		if ear < EYE_AR_THRESH:
+		if leftEAR < EYE_AR_THRESH and rightEAR < EYE_AR_THRESH:
 			COUNTER += 1
 
 		# otherwise, the eye aspect ratio is not below the blink
@@ -134,43 +134,42 @@ while True:
 			# reset the eye frame counter
 			COUNTER = 0
 			
+			#left
 		
-		#left
-		
-		# check to see if the eye aspect ratio is below the blink
-		# threshold, and if so, increment the blink frame counter
-		if leftEAR < EYE_AR_THRESH:
-			COUNTER_L += 1
+			# check to see if the eye aspect ratio is below the blink
+			# threshold, and if so, increment the blink frame counter
+			if leftEAR < EYE_AR_THRESH:
+				COUNTER_L += 1
 
-		# otherwise, the eye aspect ratio is not below the blink
-		# threshold
-		else:
-			# if the eyes were closed for a sufficient number of
-			# then increment the total number of blinks
-			if COUNTER_L >= EYE_AR_CONSEC_FRAMES:
-				TOTAL_L += 1
+			# otherwise, the eye aspect ratio is not below the blink
+			# threshold
+			else:
+				# if the eyes were closed for a sufficient number of
+				# then increment the total number of blinks
+				if COUNTER_L >= EYE_AR_CONSEC_FRAMES:
+					TOTAL_L += 1
 
-			# reset the eye frame counter
-			COUNTER_L = 0
+				# reset the eye frame counter
+				COUNTER_L = 0
 			
 
-		#right
+			#right
 		
-		# check to see if the eye aspect ratio is below the blink
-		# threshold, and if so, increment the blink frame counter
-		if rightEAR < EYE_AR_THRESH:
-			COUNTER_R += 1
+			# check to see if the eye aspect ratio is below the blink
+			# threshold, and if so, increment the blink frame counter
+			if rightEAR < EYE_AR_THRESH:
+				COUNTER_R += 1
 
-		# otherwise, the eye aspect ratio is not below the blink
-		# threshold
-		else:
-			# if the eyes were closed for a sufficient number of
-			# then increment the total number of blinks
-			if COUNTER_R >= EYE_AR_CONSEC_FRAMES:
-				TOTAL_R += 1
+			# otherwise, the eye aspect ratio is not below the blink
+			# threshold
+			else:
+				# if the eyes were closed for a sufficient number of
+				# then increment the total number of blinks
+				if COUNTER_R >= EYE_AR_CONSEC_FRAMES:
+					TOTAL_R += 1
 
-			# reset the eye frame counter
-			COUNTER_R = 0			
+				# reset the eye frame counter
+				COUNTER_R = 0			
 		
 		
 		# draw the total number of blinks on the frame along with
