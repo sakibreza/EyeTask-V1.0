@@ -8,6 +8,7 @@ from PyQt5.uic import loadUi
 from Speach import Speach
 from image_processors.BlinkDetector import BlinkDetector
 from image_processors.GazeDetector import GazeDetector
+from image_processors.OnlyGazeShower import OnlyGazeShower
 
 
 class MainWindow(QMainWindow):
@@ -21,26 +22,28 @@ class MainWindow(QMainWindow):
         # mode 0 = not controlling wheel chair; controlling menu with eye-blink
         # mode 1 = controling wheel chair with eye-gaze
         # mode 2 = Speech mode
-        self.current_mode = 2
+        self.current_mode = 0
 
-        self.cap = cv2.VideoCapture(0)
-        self.gazeDetector = GazeDetector(self.haar_file_location_lineEdit.text())
+        self.cap = None
+        if self.current_mode is 0 or 1:
+            self.cap = cv2.VideoCapture(0)
+        # self.gazeDetector = GazeDetector(self.haar_file_location_lineEdit.text())
+        self.gazeDetector = OnlyGazeShower()
 
-        # TODO: make a way to select the .dat file
         self.blinkDetector = BlinkDetector("haar_cascades/shape_predictor_68_face_landmarks.dat")
         self.blinkDetector.leftAddCallback(self.moveFocusLeft)
         self.blinkDetector.rightAddCallback(self.moveFocusRight)
         self.blinkDetector.bothAddCallback(self.pressFocused)
 
-        self.speech = Speach()
-        self.speechObj()
-
+        # self.speech = Speach()
+        # self.speechObj()
 
         self.currentFocus = 0
         self.__initialize_buttons()
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.updateFrame)
         self.timer.start(10)
+
 
     def speechObj(self):
         self.speech.commands["video"] = self.moveFocusLeft
@@ -60,10 +63,11 @@ class MainWindow(QMainWindow):
                 self.main_image_label.setScaledContents(True)
 
             elif self.current_mode is 1:
+                self.gazeDetector.run(img)
                 blink_dict = self.blinkDetector.run_blink_detector(img)
-                if blink_dict["eyegaze"] is not None:
-                    gazeDict = self.gazeDetector.get_processed_image(blink_dict["eyegaze"])
-                    self.updateImageInfo(gazeDict)
+            # if blink_dict["eyegaze"] is not None:
+            #     gazeDict = self.gazeDetector.get_processed_image(blink_dict["eyegaze"])
+            #     self.updateImageInfo(gazeDict)
 
             # if blink_dict["eyegaze"] is not None and self.current_mode is 1:
             #     self.updateImage(gazeDict["image"])
@@ -74,7 +78,6 @@ class MainWindow(QMainWindow):
         elif self.current_mode is 2:
             self.speech.recognize_speech_from_mic()
 
-
     def __initialize_buttons(self):
         self.buttons = [self.b1_1, self.b1_2, self.b1_3,
                         self.b2_1, self.b2_2, self.b2_3,
@@ -82,6 +85,10 @@ class MainWindow(QMainWindow):
         for b in self.buttons:
             b.setAutoDefault(True)
         self.buttons[self.currentFocus].setFocus(True)
+        self.b2_2.clicked.connect(self.toggleEyeGaze)
+
+    def toggleEyeGaze(self):
+        self.current_mode = 1
 
     def moveFocusRight(self):
         self.currentFocus = (self.currentFocus + 1) % 9
