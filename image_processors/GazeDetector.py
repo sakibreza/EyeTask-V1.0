@@ -6,13 +6,13 @@ class GazeDetector:
     def __init__(self, cascade):
         self.pupil_cascade = cv2.CascadeClassifier(cascade)
 
-        self.cap = cv2.VideoCapture(0)
+        # self.cap = cv2.VideoCapture(0)
         self.init = [0, 0]
         self.coordinate = [0, 0]
         self.radius = 5
 
-    def get_image(self):
-        _, img = self.cap.read()  # numpy.ndarray (480, 640, 3)
+    def get_processed_image(self, img):
+        # _, img = self.cap.read()  # numpy.ndarray (480, 640, 3)
         # img = cv2.flip(img, -1)
         # img = cv2.flip(img, +1)
 

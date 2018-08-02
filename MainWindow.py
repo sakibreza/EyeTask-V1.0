@@ -1,8 +1,12 @@
+import cv2
+
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.uic import loadUi
-from GazeDetector import GazeDetector
+
+from image_processors.BlinkDetector import BlinkDetector
+from image_processors.GazeDetector import GazeDetector
 
 
 class MainWindow(QMainWindow):
@@ -13,20 +17,49 @@ class MainWindow(QMainWindow):
         self.upload_haar_button.clicked.connect(self.selectHaar)
         self.haar_file_location_lineEdit.setText("haar_cascades/cascade_eye.xml")
 
-        self.gazeDetector = GazeDetector(self.haar_file_location_lineEdit.text())
-        self.timer = QTimer(self)
+        # mode 0 = not controlling wheel chair; controlling menu with eye-blink
+        # mode 1 = controling wheel chair with eye-gaze
+        self.current_mode = 0
 
+        self.cap = cv2.VideoCapture(0)
+        self.gazeDetector = GazeDetector(self.haar_file_location_lineEdit.text())
+
+        # TODO: make a way to select the .dat file
+        self.blinkDetector = BlinkDetector("haar_cascades/shape_predictor_68_face_landmarks.dat")
+        self.blinkDetector.leftAddCallback(self.moveFocusLeft)
+        self.blinkDetector.rightAddCallback(self.moveFocusRight)
+        self.blinkDetector.bothAddCallback(self.pressFocused)
+
+        self.__initialize_buttons()
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.updateFrame)
+        self.timer.start(10)
+
+    def updateFrame(self):
+
+        _, img = self.cap.read()  # numpy.ndarray (480, 640, 3)
+        getDict = {}
+        if self.current_mode is 0:
+            getDict = self.blinkDetector.run_blink_detector(img)
+            outImage = toQImage(getDict["image"])
+            outImage = outImage.rgbSwapped()
+            self.main_image_label.setPixmap(QPixmap.fromImage(outImage))
+            self.main_image_label.setScaledContents(True)
+
+        elif self.current_mode is 1:
+            getDict = self.gazeDetector.get_processed_image(img)
+            self.updateImageInfo(getDict)
+
+        self.updateImage(getDict["image"])
+
+    def __initialize_buttons(self):
         self.currentFocus = 0
         self.buttons = [self.b1_1, self.b1_2, self.b1_3,
                         self.b2_1, self.b2_2, self.b2_3,
                         self.b3_1, self.b3_2, self.b3_3]
         for b in self.buttons:
             b.setAutoDefault(True)
-
         self.buttons[self.currentFocus].setFocus(True)
-
-        self.timer.timeout.connect(self.updateFrame)
-        self.timer.start(10)
 
     def moveFocusRight(self):
         self.currentFocus = (self.currentFocus + 1) % 8
@@ -44,6 +77,9 @@ class MainWindow(QMainWindow):
         self.currentFocus = (self.currentFocus - 3) % 8
         self.buttons[self.currentFocus].setFocus(True)
 
+    def pressFocused(self):
+        self.buttons[self.currentFocus].animateClick()
+
     def updateImage(self, img):
         outImage = toQImage(img)
         outImage = outImage.rgbSwapped()
@@ -60,11 +96,6 @@ class MainWindow(QMainWindow):
               + "\nAngle = " + str(dict["angle"])
 
         self.image_info_textlabel.setText(val)
-
-    def updateFrame(self):
-        getDict = self.gazeDetector.get_image()
-        self.updateImage(getDict["image"])
-        self.updateImageInfo(getDict)
 
     def selectHaar(self):
         file = QFileDialog.getOpenFileName()
