@@ -1,3 +1,5 @@
+import numpy as np
+
 import cv2
 
 import dlib
@@ -85,8 +87,7 @@ class BlinkDetector:
             eyegaze = frame[max(leftEye[1][1], 0):leftEye[5][1], max(leftEye[0][0], 0):leftEye[3][0]]
             # eyegaze = cv2.resize(eyegaze, (640, 450))
             eyegaze = cv2.resize(eyegaze, (0, 0), fx=8, fy=8)
-            print(eyegaze.shape)
-            retDict["eyegaze"] = eyegaze
+            retDict["eyegaze"] = np.copy(eyegaze)
 
             # TODO: same for both
 

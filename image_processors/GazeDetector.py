@@ -26,6 +26,7 @@ class GazeDetector:
         self.init[0] = img.shape[1] // 2
         self.init[1] = img.shape[0] // 2
 
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         # noise removal
         kernel = np.ones((3, 3), np.uint8)
         img = cv2.morphologyEx(img, cv2.MORPH_OPEN, kernel, iterations=2)
@@ -91,7 +92,7 @@ class GazeDetector:
                                       fontColor,
                                       lineType)
 
-        # cv2.imshow("eye-gaze", img)
+        cv2.imshow("eye-gaze", img)
         ret = {"image": img, "initial": self.init, "current": self.coordinate, "direction": self.direction(),
                "angle": self.getangle()}
 

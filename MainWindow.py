@@ -5,6 +5,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.uic import loadUi
 
+from Speach import Speach
 from image_processors.BlinkDetector import BlinkDetector
 from image_processors.GazeDetector import GazeDetector
 
@@ -15,13 +16,14 @@ class MainWindow(QMainWindow):
         loadUi("./ui/MainWindow.ui", self)
         self.setWindowTitle("Eye Gaze Detection")
         self.upload_haar_button.clicked.connect(self.selectHaar)
-        self.haar_file_location_lineEdit.setText("haar_cascades/cascade_eye.xml")
+        self.haar_file_location_lineEdit.setText("haar_cascades/cascade.xml")
 
         # mode 0 = not controlling wheel chair; controlling menu with eye-blink
         # mode 1 = controling wheel chair with eye-gaze
-        self.current_mode = 1
+        # mode 2 = Speech mode
+        self.current_mode = 2
 
-        self.cap = cv2.VideoCapture(1)
+        self.cap = cv2.VideoCapture(0)
         self.gazeDetector = GazeDetector(self.haar_file_location_lineEdit.text())
 
         # TODO: make a way to select the .dat file
@@ -30,34 +32,48 @@ class MainWindow(QMainWindow):
         self.blinkDetector.rightAddCallback(self.moveFocusRight)
         self.blinkDetector.bothAddCallback(self.pressFocused)
 
+        self.speech = Speach()
+        self.speechObj()
+
+
         self.currentFocus = 0
         self.__initialize_buttons()
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.updateFrame)
         self.timer.start(10)
 
+    def speechObj(self):
+        self.speech.commands["video"] = self.moveFocusLeft
+        self.speech.commands["music"] = self.moveFocusRight
+
     def updateFrame(self):
 
-        _, img = self.cap.read()  # numpy.ndarray (480, 640, 3)
-        blink_dict = {}
-        if self.current_mode is 0:
-            blink_dict = self.blinkDetector.run_blink_detector(img)
-            outImage = toQImage(blink_dict["image"])
-            outImage = outImage.rgbSwapped()
-            self.main_image_label.setPixmap(QPixmap.fromImage(outImage))
-            self.main_image_label.setScaledContents(True)
+        if self.current_mode is not 2:
+            _, img = self.cap.read()  # numpy.ndarray (480, 640, 3)
+            blink_dict = {}
+            gazeDict = {}
+            if self.current_mode is 0:
+                blink_dict = self.blinkDetector.run_blink_detector(img)
+                outImage = toQImage(blink_dict["image"])
+                outImage = outImage.rgbSwapped()
+                self.main_image_label.setPixmap(QPixmap.fromImage(outImage))
+                self.main_image_label.setScaledContents(True)
 
-        elif self.current_mode is 1:
-            blink_dict = self.blinkDetector.run_blink_detector(img)
-            if blink_dict["eyegaze"] is not None:
-                gazeDict = self.gazeDetector.get_processed_image(blink_dict["eyegaze"])
-                self.updateImageInfo(gazeDict)
+            elif self.current_mode is 1:
+                blink_dict = self.blinkDetector.run_blink_detector(img)
+                if blink_dict["eyegaze"] is not None:
+                    gazeDict = self.gazeDetector.get_processed_image(blink_dict["eyegaze"])
+                    self.updateImageInfo(gazeDict)
 
-        if blink_dict["eyegaze"] is not None:
-            self.updateImage(gazeDict["image"])
-        else:
+            # if blink_dict["eyegaze"] is not None and self.current_mode is 1:
+            #     self.updateImage(gazeDict["image"])
+            # else:
+            #     self.updateImage(blink_dict["image"])
             self.updateImage(blink_dict["image"])
-        # self.updateImage(blink_dict["image"])
+
+        elif self.current_mode is 2:
+            self.speech.recognize_speech_from_mic()
+
 
     def __initialize_buttons(self):
         self.buttons = [self.b1_1, self.b1_2, self.b1_3,
