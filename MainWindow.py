@@ -107,7 +107,7 @@ class MainWindow(QMainWindow):
         pass
 
     def controlWheel(self):
-        self.current_mode = 9
+        pass
 
     def playEmergency(self):
         # TODO: socket programming
@@ -136,6 +136,13 @@ class MainWindow(QMainWindow):
         randomfile = random.choice(os.listdir("/home/insaneshadow/Videos"))
         file = "/home/insaneshadow/Videos/" + randomfile
         subprocess.call(['vlc', file])
+
+
+    def playEmail(self):
+        pass
+
+    def blinkModeOn(self):
+        self.current_mode = 0
 
     def moveFocusRight(self):
         self.currentFocus = (self.currentFocus + 1) % 9
