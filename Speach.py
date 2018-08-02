@@ -40,6 +40,7 @@ class Speach:
             response["error"] = "Unable to recognize speech"
 
         if response["transcription"] in self.commands:
+            print(response["transcription"] + " : executing ---")
             for func in self.commands[response["transcription"]]:
                 func()
 
