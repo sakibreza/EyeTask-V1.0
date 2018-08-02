@@ -1,7 +1,6 @@
 import cv2
 
 import dlib
-import imutils
 from imutils import face_utils
 from scipy.spatial import distance as dist
 
@@ -32,7 +31,7 @@ class BlinkDetector:
         # blink and then a second constant for the number of consecutive
         # frames the eye must be below the threshold
         self.EYE_AR_THRESH = 0.27
-        self.EYE_AR_CONSEC_FRAMES = 6
+        self.EYE_AR_CONSEC_FRAMES = 5
 
         # initialize the frame counters and the total number of blinks
         self.BOTH_COUNTER = 0
@@ -54,8 +53,9 @@ class BlinkDetector:
         (self.rStart, self.rEnd) = face_utils.FACIAL_LANDMARKS_IDXS["right_eye"]
 
     def run_blink_detector(self, frame):
+        retDict = {"eyegaze": None}
+
         frame = cv2.resize(frame, (640, 450))
-        # frame = imutils.resize(frame, width=450)
         frame = cv2.flip(frame, 1)
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
@@ -80,17 +80,18 @@ class BlinkDetector:
             # average the eye aspect ratio together for both eyes
             ear = (leftEAR + rightEAR) / 2.0
 
-            # compute the convex hull for the left and right eye, then
-            # visualize each of the eyes
-            leftEyeHull = cv2.convexHull(leftEye)
-            rightEyeHull = cv2.convexHull(rightEye)
+            # get the eye frame for the window
 
-            # TODO: May need to remove it
-            cv2.drawContours(frame, [leftEyeHull], -1, (0, 255, 0), 1)
-            cv2.drawContours(frame, [rightEyeHull], -1, (0, 255, 0), 1)
+            eyegaze = frame[max(leftEye[1][1], 0):leftEye[5][1], max(leftEye[0][0], 0):leftEye[3][0]]
+            # eyegaze = cv2.resize(eyegaze, (640, 450))
+            eyegaze = cv2.resize(eyegaze, (0, 0), fx=8, fy=8)
+            print(eyegaze.shape)
+            retDict["eyegaze"] = eyegaze
+
+            # TODO: same for both
 
             # both
-            if leftEAR < self.EYE_AR_THRESH and rightEAR < self.EYE_AR_THRESH:
+            if leftEAR < self.EYE_AR_THRESH - 0.02 and rightEAR < self.EYE_AR_THRESH - 0.02:
                 self.BOTH_COUNTER += 1
             else:
                 self.BOTH_COUNTER = 0
@@ -131,10 +132,19 @@ class BlinkDetector:
                 for func in self.callbacks["right"]:
                     func()
 
-            self.draw_in_frame(frame, ear, leftEAR, rightEAR)
-        return {"image":frame}
+            self.draw_in_frame(frame, ear, leftEAR, rightEAR, leftEye, rightEye)
+        retDict["image"] = frame
+        return retDict
 
-    def draw_in_frame(self, frame, ear, leftEAR, rightEAR):
+    def draw_in_frame(self, frame, ear, leftEAR, rightEAR, leftEye, rightEye):
+        # compute the convex hull for the left and right eye, then
+        # visualize each of the eyes
+        leftEyeHull = cv2.convexHull(leftEye)
+        rightEyeHull = cv2.convexHull(rightEye)
+
+        cv2.drawContours(frame, [leftEyeHull], -1, (0, 255, 0), 1)
+        cv2.drawContours(frame, [rightEyeHull], -1, (0, 255, 0), 1)
+
         # draw the total number of blinks on the frame along with
         # the computed eye aspect ratio for the frame
         cv2.putText(frame, "Both Blinks: {}".format(self.TOTAL), (10, 30),

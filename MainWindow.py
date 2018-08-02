@@ -19,9 +19,9 @@ class MainWindow(QMainWindow):
 
         # mode 0 = not controlling wheel chair; controlling menu with eye-blink
         # mode 1 = controling wheel chair with eye-gaze
-        self.current_mode = 0
+        self.current_mode = 1
 
-        self.cap = cv2.VideoCapture(0)
+        self.cap = cv2.VideoCapture(1)
         self.gazeDetector = GazeDetector(self.haar_file_location_lineEdit.text())
 
         # TODO: make a way to select the .dat file
@@ -30,6 +30,7 @@ class MainWindow(QMainWindow):
         self.blinkDetector.rightAddCallback(self.moveFocusRight)
         self.blinkDetector.bothAddCallback(self.pressFocused)
 
+        self.currentFocus = 0
         self.__initialize_buttons()
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.updateFrame)
@@ -38,22 +39,27 @@ class MainWindow(QMainWindow):
     def updateFrame(self):
 
         _, img = self.cap.read()  # numpy.ndarray (480, 640, 3)
-        getDict = {}
+        blink_dict = {}
         if self.current_mode is 0:
-            getDict = self.blinkDetector.run_blink_detector(img)
-            outImage = toQImage(getDict["image"])
+            blink_dict = self.blinkDetector.run_blink_detector(img)
+            outImage = toQImage(blink_dict["image"])
             outImage = outImage.rgbSwapped()
             self.main_image_label.setPixmap(QPixmap.fromImage(outImage))
             self.main_image_label.setScaledContents(True)
 
         elif self.current_mode is 1:
-            getDict = self.gazeDetector.get_processed_image(img)
-            self.updateImageInfo(getDict)
+            blink_dict = self.blinkDetector.run_blink_detector(img)
+            if blink_dict["eyegaze"] is not None:
+                gazeDict = self.gazeDetector.get_processed_image(blink_dict["eyegaze"])
+                self.updateImageInfo(gazeDict)
 
-        self.updateImage(getDict["image"])
+        if blink_dict["eyegaze"] is not None:
+            self.updateImage(gazeDict["image"])
+        else:
+            self.updateImage(blink_dict["image"])
+        # self.updateImage(blink_dict["image"])
 
     def __initialize_buttons(self):
-        self.currentFocus = 0
         self.buttons = [self.b1_1, self.b1_2, self.b1_3,
                         self.b2_1, self.b2_2, self.b2_3,
                         self.b3_1, self.b3_2, self.b3_3]
@@ -62,19 +68,19 @@ class MainWindow(QMainWindow):
         self.buttons[self.currentFocus].setFocus(True)
 
     def moveFocusRight(self):
-        self.currentFocus = (self.currentFocus + 1) % 8
+        self.currentFocus = (self.currentFocus + 1) % 9
         self.buttons[self.currentFocus].setFocus(True)
 
     def moveFocusLeft(self):
-        self.currentFocus = (self.currentFocus - 1) % 8
+        self.currentFocus = (self.currentFocus - 1) % 9
         self.buttons[self.currentFocus].setFocus(True)
 
     def moveFocusUp(self):
-        self.currentFocus = (self.currentFocus + 3) % 8
+        self.currentFocus = (self.currentFocus + 3) % 9
         self.buttons[self.currentFocus].setFocus(True)
 
     def moveFocusDown(self):
-        self.currentFocus = (self.currentFocus - 3) % 8
+        self.currentFocus = (self.currentFocus - 3) % 9
         self.buttons[self.currentFocus].setFocus(True)
 
     def pressFocused(self):

@@ -6,65 +6,92 @@ class GazeDetector:
     def __init__(self, cascade):
         self.pupil_cascade = cv2.CascadeClassifier(cascade)
 
-        # self.cap = cv2.VideoCapture(0)
         self.init = [0, 0]
         self.coordinate = [0, 0]
         self.radius = 5
 
+        self.CONSEC_FRAMES = 2
+        self.dir_c = 0
+        self.dir_l = 0
+        self.dir_r = 0
+
+    def draw_in_frame(self, img):
+        cv2.line(img, (self.init[0] - 15, self.init[1] - 15), (self.init[0] + 15, self.init[1] + 15), (255, 0, 0), 2)
+        cv2.line(img, (self.init[0] + 15, self.init[1] - 15), (self.init[0] - 15, self.init[1] + 15), (255, 0, 0), 2)
+        cv2.circle(img, (self.coordinate[0], self.coordinate[1]), 3, (255, 0, 0), 2)
+        # cv2.line(img, (init[0], init[1]), (coordinate[0],coordinate[1]), (0,255,0), 2)
+
     def get_processed_image(self, img):
-        # _, img = self.cap.read()  # numpy.ndarray (480, 640, 3)
-        # img = cv2.flip(img, -1)
-        # img = cv2.flip(img, +1)
 
-        img = img[200:500, 300:500, :]  # numpy.ndarray (280, 340, 3)
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        pupil = self.pupil_cascade.detectMultiScale(gray, 1.3, 4)
-        cv2.circle(img, (self.init[0], self.init[1]), self.radius, (0, 255, 0), 2)
-        cv2.line(img, (self.init[0], self.init[1]), (self.coordinate[0], self.coordinate[1]), (0, 255, 0), 2)
+        self.init[0] = img.shape[1] // 2
+        self.init[1] = img.shape[0] // 2
 
-        if pupil is not ():
-            x, y, w, h = pupil[0][0], pupil[0][1], pupil[0][2], pupil[0][3]
+        # noise removal
+        kernel = np.ones((3, 3), np.uint8)
+        img = cv2.morphologyEx(img, cv2.MORPH_OPEN, kernel, iterations=2)
 
-            self.coordinate = [int(x + w / 2), int(y + h / 2)]
-            cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 3)
+        # Finding unknown region
+        eye = self.pupil_cascade.detectMultiScale(img, 1.1, 5)
 
-            # print("-----")
-            # print("initial = " + str(self.init))
-            # print("current = " + str(self.coordinate))
-            # print("direction = " + self.direction())
-            # print("angle = " + self.getangle())
+        self.draw_in_frame(img)
+
+        for (x, y, w, h) in eye:
+            self.coordinate = [(x + w) // 2, (y + h) // 2]
+            print("-----")
+            print("initial = " + str(self.init))
+            print("current = " + str(self.coordinate))
+            dir = self.direction()
+            print("direction = " + dir)
+            angle = self.getangle()
+            print("angle = " + angle)
 
             font = cv2.FONT_HERSHEY_SIMPLEX
-            bottomLeftCornerOfTextr = (200, 250)
-            bottomLeftCornerOfTextc = (80, 250)
-            bottomLeftCornerOfTextl = (20, 250)
+            bottomLeftCornerOfTextc = (20, 30)
             fontScale = 1
             fontColor = (255, 255, 255)
             lineType = 2
 
             if dir == "center":
-                img = cv2.putText(img, '< Center >',
-                                  bottomLeftCornerOfTextc,
-                                  font,
-                                  fontScale,
-                                  fontColor,
-                                  lineType)
+
+                self.dir_c += 1
+
+                if self.dir_c > self.CONSEC_FRAMES:
+                    self.dir_l = 0
+                    self.dir_r = 0
+                    img = cv2.putText(img, '< Center >',
+                                      bottomLeftCornerOfTextc,
+                                      font,
+                                      fontScale,
+                                      fontColor,
+                                      lineType)
+
             elif dir == "right":
-                img = cv2.putText(img, 'Right >',
-                                  bottomLeftCornerOfTextr,
-                                  font,
-                                  fontScale,
-                                  fontColor,
-                                  lineType)
+                self.dir_r += 1
+
+                if self.dir_r > self.CONSEC_FRAMES:
+                    self.dir_l = 0
+                    self.dir_c = 0
+                    img = cv2.putText(img, 'Right >',
+                                      bottomLeftCornerOfTextc,
+                                      font,
+                                      fontScale,
+                                      fontColor,
+                                      lineType)
 
             elif dir == "left":
-                img = cv2.putText(img, '< left',
-                                  bottomLeftCornerOfTextl,
-                                  font,
-                                  fontScale,
-                                  fontColor,
-                                  lineType)
+                self.dir_l += 1
 
+                if self.dir_l > self.CONSEC_FRAMES:
+                    self.dir_c = 0
+                    self.dir_r = 0
+                    img = cv2.putText(img, '< Left',
+                                      bottomLeftCornerOfTextc,
+                                      font,
+                                      fontScale,
+                                      fontColor,
+                                      lineType)
+
+        # cv2.imshow("eye-gaze", img)
         ret = {"image": img, "initial": self.init, "current": self.coordinate, "direction": self.direction(),
                "angle": self.getangle()}
 
