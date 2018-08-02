@@ -34,6 +34,8 @@ class MainWindow(QMainWindow):
         self.blinkDetector.rightAddCallback(self.moveFocusRight)
         self.blinkDetector.bothAddCallback(self.pressFocused)
 
+        self.speech = Speach() 
+        self.speechObj()
 
         self.currentFocus = 0
         self.__initialize_buttons()
