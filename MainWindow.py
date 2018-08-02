@@ -37,8 +37,8 @@ class MainWindow(QMainWindow):
         self.blinkDetector.rightAddCallback(self.moveFocusRight)
         self.blinkDetector.bothAddCallback(self.pressFocused)
 
-        self.speech = Speach()
-        self.speechObj()
+        # self.speech = Speach()
+        # self.speechObj()
 
         self.currentFocus = 0
         self.__initialize_buttons()
@@ -65,7 +65,7 @@ class MainWindow(QMainWindow):
             self.gazeDetector.run(img)
 
         elif self.current_mode is 2:
-            if self.thread is None and not self.thread.is_alive():
+            if self.thread is None or not self.thread.is_alive():
                 self.thread = Thread(target=self.speech.recognize_speech_from_mic)
                 # self.speech.recognize_speech_from_mic()
                 self.thread.start()
