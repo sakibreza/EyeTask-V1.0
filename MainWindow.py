@@ -34,7 +34,7 @@ class MainWindow(QMainWindow):
         self.blinkDetector.rightAddCallback(self.moveFocusRight)
         self.blinkDetector.bothAddCallback(self.pressFocused)
 
-        self.speech = Speach() 
+        self.speech = Speach()
         self.speechObj()
 
         self.currentFocus = 0
@@ -79,9 +79,8 @@ class MainWindow(QMainWindow):
             "Voice-Help"
         ])
         self.selectMethodComboBox.setCurrentIndex(0)
-        self.selectMethodComboBox.currentIndexChanged.connect(lambda: self.setCurrentMode(self.selectMethodComboBox.currentIndex()))
-
-
+        self.selectMethodComboBox.currentIndexChanged.connect(
+            lambda: self.setCurrentMode(self.selectMethodComboBox.currentIndex()))
 
         self.buttons = [self.b1_1, self.b1_2, self.b1_3,
                         self.b2_1, self.b2_2, self.b2_3,
@@ -107,7 +106,7 @@ class MainWindow(QMainWindow):
         pass
 
     def controlWheel(self):
-        pass
+        self.setCurrentMode(9)
 
     def playEmergency(self):
         # TODO: socket programming
@@ -136,7 +135,6 @@ class MainWindow(QMainWindow):
         randomfile = random.choice(os.listdir("/home/insaneshadow/Videos"))
         file = "/home/insaneshadow/Videos/" + randomfile
         subprocess.call(['vlc', file])
-
 
     def playEmail(self):
         pass
