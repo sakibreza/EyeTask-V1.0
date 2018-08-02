@@ -22,7 +22,7 @@
      <rect>
       <x>12</x>
       <y>11</y>
-      <width>750</width>
+      <width>765</width>
       <height>451</height>
      </rect>
     </property>
@@ -93,7 +93,7 @@
          <item row="2" column="2">
           <widget class="QPushButton" name="b3_3">
            <property name="text">
-            <string>PushButton</string>
+            <string>Voice Command</string>
            </property>
           </widget>
          </item>

@@ -1,3 +1,5 @@
+from threading import Thread
+
 import cv2
 
 from PyQt5.QtWidgets import *
@@ -35,8 +37,8 @@ class MainWindow(QMainWindow):
         self.blinkDetector.rightAddCallback(self.moveFocusRight)
         self.blinkDetector.bothAddCallback(self.pressFocused)
 
-        # self.speech = Speach()
-        # self.speechObj()
+        self.speech = Speach()
+        self.speechObj()
 
         self.currentFocus = 0
         self.__initialize_buttons()
@@ -44,39 +46,30 @@ class MainWindow(QMainWindow):
         self.timer.timeout.connect(self.updateFrame)
         self.timer.start(10)
 
+        self.thread = None
+        self.main_image_label.setScaledContents(True)
 
     def speechObj(self):
-        self.speech.commands["video"] = self.moveFocusLeft
-        self.speech.commands["music"] = self.moveFocusRight
+        self.speech.commands["video"].append(self.moveFocusLeft)
+        self.speech.commands["music"].append(self.moveFocusRight)
 
     def updateFrame(self):
+        gazeDict = {}
+        _, img = self.cap.read()  # numpy.ndarray (480, 640, 3)
+        blink_dict = self.blinkDetector.run_blink_detector(img)
+        outImage = toQImage(blink_dict["image"])
+        outImage = outImage.rgbSwapped()
+        self.main_image_label.setPixmap(QPixmap.fromImage(outImage))
 
-        if self.current_mode is not 2:
-            _, img = self.cap.read()  # numpy.ndarray (480, 640, 3)
-            blink_dict = {}
-            gazeDict = {}
-            if self.current_mode is 0:
-                blink_dict = self.blinkDetector.run_blink_detector(img)
-                outImage = toQImage(blink_dict["image"])
-                outImage = outImage.rgbSwapped()
-                self.main_image_label.setPixmap(QPixmap.fromImage(outImage))
-                self.main_image_label.setScaledContents(True)
-
-            elif self.current_mode is 1:
-                self.gazeDetector.run(img)
-                blink_dict = self.blinkDetector.run_blink_detector(img)
-            # if blink_dict["eyegaze"] is not None:
-            #     gazeDict = self.gazeDetector.get_processed_image(blink_dict["eyegaze"])
-            #     self.updateImageInfo(gazeDict)
-
-            # if blink_dict["eyegaze"] is not None and self.current_mode is 1:
-            #     self.updateImage(gazeDict["image"])
-            # else:
-            #     self.updateImage(blink_dict["image"])
-            self.updateImage(blink_dict["image"])
+        if self.current_mode is 1:
+            self.gazeDetector.run(img)
 
         elif self.current_mode is 2:
-            self.speech.recognize_speech_from_mic()
+            if self.thread is None and not self.thread.is_alive():
+                self.thread = Thread(target=self.speech.recognize_speech_from_mic)
+                # self.speech.recognize_speech_from_mic()
+                self.thread.start()
+                print("thread started")
 
     def __initialize_buttons(self):
         self.buttons = [self.b1_1, self.b1_2, self.b1_3,
@@ -86,9 +79,16 @@ class MainWindow(QMainWindow):
             b.setAutoDefault(True)
         self.buttons[self.currentFocus].setFocus(True)
         self.b2_2.clicked.connect(self.toggleEyeGaze)
+        self.b3_3.clicked.connect(self.soundModeOn)
 
     def toggleEyeGaze(self):
         self.current_mode = 1
+
+    def soundModeOn(self):
+        self.current_mode = 2
+
+    def blinkModeOn(self):
+        self.current_mode = 0
 
     def moveFocusRight(self):
         self.currentFocus = (self.currentFocus + 1) % 9
