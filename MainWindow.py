@@ -18,7 +18,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
         loadUi("./ui/MainWindow.ui", self)
-        self.setWindowTitle("Eye Gaze Detection")
+        self.setWindowTitle("Eye Based Wheelchair Control & Task Manager")
         self.resetButton.clicked.connect(self.resetAll)
 
         self.currentFocus = 0
