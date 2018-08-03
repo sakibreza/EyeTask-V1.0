@@ -12,7 +12,7 @@ def direction (ini,cur) :
 	iy = ini[1]
 	cx = cur[0]
 	cy = cur[1]
-	rad = 5
+	rad = 10
 	if init == [0,0] :
 		return "not initialized"
 	elif cx<=ix+rad and cx>=ix-rad :
@@ -38,6 +38,7 @@ def getangle (ini,cur) :
 	
 while 1:
 	ret, img = cap.read()
+	img = cv2.flip(img,1)
 	gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 	faces = face_cascade.detectMultiScale(gray, 1.3, 3)
 	cv2.circle(img, (init[0],init[1]), 3, (0, 255, 0), -1)
