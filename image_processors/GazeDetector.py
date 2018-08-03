@@ -80,7 +80,7 @@ class GazeDetector:
             # print("-----")
             # print("initial = " + str(self.init))
             # print("current = " + str(self.coordinate))
-            # dir = self.direction(self.init, self.coordinate)
+            dir = self.direction(self.init, self.coordinate)
             # print("direction = " + dir)
             # angle = self.getangle(self.init, self.coordinate)
             # print("angle = " + angle)
