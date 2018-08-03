@@ -11,6 +11,9 @@ from Speach import Speach
 from image_processors.BlinkDetector import BlinkDetector
 from image_processors.GazeDetector import GazeDetector
 
+import os
+from socket import *
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -115,12 +118,20 @@ class MainWindow(QMainWindow):
             self.setCurrentMode(9)
 
         def playFan():
-            # TODO: socket programming
-            pass
+            host = "192.168.1.4" # set to IP address of target computer
+            port = 13000
+            addr = (host, port) 
+            UDPSock = socket(AF_INET, SOCK_DGRAM)
+            UDPSock.sendto(bytes('fan'.encode()), addr)
+            UDPSock.close()
 
         def playLight():
-            # TODO: socket programming
-            pass
+            host = "192.168.1.4" # set to IP address of target computer
+            port = 13000
+            addr = (host, port) 
+            UDPSock = socket(AF_INET, SOCK_DGRAM)
+            UDPSock.sendto(bytes('light'.encode()), addr)
+            UDPSock.close()
 
         def playBrowser():
             import webbrowser
