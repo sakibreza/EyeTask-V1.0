@@ -249,23 +249,28 @@ class MainWindow(QMainWindow):
         self.current_subprecess = subprocess.Popen(['vlc', file])
 
     def moveFocusRight(self):
-        self.currentFocus = (self.currentFocus + 1) % 8
-        self.buttons[self.currentFocus].setFocus(True)
+        if self.current_subprecess is None or self.current_mode is 1:
+            self.currentFocus = (self.currentFocus + 1) % 8
+            self.buttons[self.currentFocus].setFocus(True)
 
     def moveFocusLeft(self):
-        self.currentFocus = (self.currentFocus - 1) % 8
-        self.buttons[self.currentFocus].setFocus(True)
+        if self.current_subprecess is None or self.current_mode is 1:
+            self.currentFocus = (self.currentFocus - 1) % 8
+            self.buttons[self.currentFocus].setFocus(True)
 
     def moveFocusUp(self):
-        self.currentFocus = (self.currentFocus + 2) % 8
-        self.buttons[self.currentFocus].setFocus(True)
+        if self.current_subprecess is None or self.current_mode is 1:
+            self.currentFocus = (self.currentFocus + 2) % 8
+            self.buttons[self.currentFocus].setFocus(True)
 
     def moveFocusDown(self):
-        self.currentFocus = (self.currentFocus - 2) % 8
-        self.buttons[self.currentFocus].setFocus(True)
+        if self.current_subprecess is None or self.current_mode is 1:
+            self.currentFocus = (self.currentFocus - 2) % 8
+            self.buttons[self.currentFocus].setFocus(True)
 
     def pressFocused(self):
-        self.buttons[self.currentFocus].animateClick()
+        if self.current_subprecess is None or self.current_mode is 1:
+            self.buttons[self.currentFocus].animateClick()
 
 
 def toQImage(raw_img):
