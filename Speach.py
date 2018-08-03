@@ -18,7 +18,8 @@ class Speach:
             "light": [],
             "fan": [],
             "news": [],
-            "wheel chair": []
+            "wheel chair": [],
+			"close" : []
         }
         # self.video = []
         # self.sms = []

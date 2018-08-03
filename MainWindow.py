@@ -151,6 +151,7 @@ class MainWindow(QMainWindow):
             pass
         elif self.selectMethodComboBox.currentIndex() == 2:
             self.current_mode = 2
+            self.chair.is_going = True
         if self.selectMethodComboBox.currentIndex() != 2:
             self.soundThread = None
 
