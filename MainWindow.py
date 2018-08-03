@@ -7,6 +7,7 @@ from PyQt5.QtGui import *
 from PyQt5.uic import loadUi
 from Speach import Speach
 from WheelChair import WheelChair
+from image_processors.FaceDetector import FaceDetector
 from image_processors.BlinkDetector import BlinkDetector
 from image_processors.GazeDetector import GazeDetector
 from zeep import Client
@@ -21,6 +22,8 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Eye Based Wheelchair Control & Task Manager")
         self.resetButton.clicked.connect(self.resetAll)
 
+        self.faceDetector = FaceDetector()
+
         self.currentFocus = 0
         self.__initialize_buttons()
         self.timer = QTimer(self)
@@ -34,7 +37,8 @@ class MainWindow(QMainWindow):
         # mode 0 = not controlling wheel chair; controlling menu with eye-blink
         # mode 1 = controling wheel chair with eye-gaze and eye-blink
         # mode 2 = Speech mode
-        # mode 3 = Speech mode for wheel chair
+        # mode 3 = Face mode
+        # mode 4 = Face mode wheel chair
         self.current_mode = 0
 
         self.cap = cv2.VideoCapture(1)
@@ -44,8 +48,8 @@ class MainWindow(QMainWindow):
         self.blinkDetector = BlinkDetector()
         self.initialize_blinkdetector()
 
-        self.speech = Speach()
-        self.initialize_speech()
+        # self.speech = Speach()
+        # self.initialize_speech()
 
         self.timer.start(10)
 
@@ -60,12 +64,13 @@ class MainWindow(QMainWindow):
 
     def updateFrame(self):
         info = {}
-        if self.current_mode == 0 or self.current_mode == 1:
+        if self.current_mode == 0 or self.current_mode == 1 or self.current_mode == 3 or self.current_mode == 4:
             _, img = self.cap.read()
             blink_dict = self.blinkDetector.run_blink_detector(img)
-            outImage = toQImage(blink_dict["image"])
-            outImage = outImage.rgbSwapped()
-            self.main_image_label.setPixmap(QPixmap.fromImage(outImage))
+            if self.current_mode != 4 or self.current_mode != 2:
+                outImage = toQImage(blink_dict["image"])
+                outImage = outImage.rgbSwapped()
+                self.main_image_label.setPixmap(QPixmap.fromImage(outImage))
             info["left"] = blink_dict["leftTotal"]
             info["right"] = blink_dict["rightTotal"]
             info["both"] = blink_dict["bothTotal"]
@@ -100,11 +105,50 @@ class MainWindow(QMainWindow):
                     self.current_mode = 0
                     self.gazeDetector.closeAll()
 
+            elif self.current_mode == 3:
+                faceDict = self.faceDetector.get_processed_image(img)
+                if blink_dict["right"]:
+                    self.faceDetector.initPos(faceDict["face"])
+
+                if blink_dict["both"]:
+                    self.pressFocused()
+
+                if faceDict["direction"] == "right":
+                    self.moveFocusRight()
+                if faceDict["direction"] == "left":
+                    self.moveFocusLeft()
+                if faceDict["direction"] == "up":
+                    self.moveFocusUp()
+                if faceDict["direction"] == "down":
+                    self.moveFocusDown()
+
+            elif self.current_mode == 4:
+                faceDict = self.faceDetector.get_processed_image(img)
+                self.main_image_label.setText("Chair wheel Mode"
+                                              "\n\n Press right eye to initialize"
+                                              "\n\n Press both eye for exit")
+                if blink_dict["both"]:
+                    self.chair.stop()
+                    self.chair.is_going = False
+                    self.current_mode = 3
+
+                if faceDict["direction"] == "right":
+                    self.chair.right()
+                elif faceDict["direction"] == "left":
+                    self.chair.left()
+                elif faceDict["direction"] == "up":
+                    self.chair.start()
+                elif faceDict["direction"] == "down":
+                    self.chair.stop()
+                # elif faceDict["direction"] == "center":
+                #     self.chair.stop()
+
         elif self.current_mode == 2:
             if self.soundThread is None or not self.soundThread.is_alive():
                 self.soundThread = Thread(target=self.speech.recognize_speech_from_mic)
                 self.soundThread.start()
                 print("Started Listening")
+            self.main_image_label.setText("Listening")
 
         self.updateImageInfo(info)
 
@@ -140,14 +184,12 @@ class MainWindow(QMainWindow):
         if self.current_subprecess is not None:
             self.current_subprecess.terminate()
 
-    def setCurrentMode(self, i):
-        self.current_mode = i
-
     def comboboxIndexChanged(self):
         if self.selectMethodComboBox.currentIndex() == 0:
             self.current_mode = 0
         elif self.selectMethodComboBox.currentIndex() == 1:
-            pass
+            self.current_mode = 3
+            self.chair.is_going = False
         elif self.selectMethodComboBox.currentIndex() == 2:
             self.current_mode = 2
             self.chair.is_going = True
@@ -199,7 +241,10 @@ class MainWindow(QMainWindow):
             print(e)
 
     def controlWheel(self):
-        self.setCurrentMode(1)
+        if self.current_mode == 3 or self.current_mode == 4:
+            self.current_mode = 4
+        else:
+            self.current_mode = 1
 
     def playEmail(self):
         try:
@@ -249,27 +294,27 @@ class MainWindow(QMainWindow):
         self.current_subprecess = subprocess.Popen(['vlc', file])
 
     def moveFocusRight(self):
-        if self.current_subprecess is None or self.current_mode != 1:
+        if self.current_subprecess is None or self.current_mode != 1 or self.current_mode != 3:
             self.currentFocus = (self.currentFocus + 1) % 8
             self.buttons[self.currentFocus].setFocus(True)
 
     def moveFocusLeft(self):
-        if self.current_subprecess is None or self.current_mode != 1:
+        if self.current_subprecess is None or self.current_mode != 1 or self.current_mode != 3:
             self.currentFocus = (self.currentFocus - 1) % 8
             self.buttons[self.currentFocus].setFocus(True)
 
     def moveFocusUp(self):
-        if  self.current_subprecess is None or self.current_mode != 1:
+        if  self.current_subprecess is None or self.current_mode != 1 or self.current_mode != 3:
             self.currentFocus = (self.currentFocus + 2) % 8
             self.buttons[self.currentFocus].setFocus(True)
 
     def moveFocusDown(self):
-        if  self.current_subprecess is None or self.current_mode != 1:
+        if  self.current_subprecess is None or self.current_mode != 1 or self.current_mode != 3:
             self.currentFocus = (self.currentFocus - 2) % 8
             self.buttons[self.currentFocus].setFocus(True)
 
     def pressFocused(self):
-        if self.current_subprecess is None or self.current_mode != 1:
+        if self.current_subprecess is None or self.current_mode != 1 or self.current_mode != 3:
             self.buttons[self.currentFocus].animateClick()
 
 
