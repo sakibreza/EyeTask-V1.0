@@ -60,7 +60,6 @@ class MainWindow(QMainWindow):
 
     def updateFrame(self):
         info = {}
-
         if self.current_mode == 0 or self.current_mode == 1:
             _, img = self.cap.read()
             blink_dict = self.blinkDetector.run_blink_detector(img)

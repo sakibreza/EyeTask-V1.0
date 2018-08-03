@@ -41,7 +41,9 @@ class BlinkDetector:
         retDict = {"eyegaze": None,
                    "both": False,
                    "left": False,
-                   "right": False}
+                   "right": False,
+				   "rightEAR": -1,
+				   "leftEAR": -1}
 
         frame = cv2.resize(frame, (640, 450))
         frame = cv2.flip(frame, 1)

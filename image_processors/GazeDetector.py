@@ -28,7 +28,7 @@ class GazeDetector:
         (self.rStart, self.rEnd) = face_utils.FACIAL_LANDMARKS_IDXS["right_eye"]
 
     def get_processed_image(self, frame):
-        ret = {}
+        ret = {"direction" : 0}
 
         frame = cv2.resize(frame, (640, 450))
         frame = cv2.flip(frame, 1)
@@ -41,7 +41,7 @@ class GazeDetector:
             rectCounter += 1
 
         if rectCounter is 0:
-            return
+            return ret
 
         # loop over the face detections
         for rect in rects:
@@ -155,6 +155,7 @@ class GazeDetector:
             return "right"
         elif cx <= ix - rad:
             return "left"
+        
 
     def getangle(self, ini, cur):
         ix = ini[0]
