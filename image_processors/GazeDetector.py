@@ -57,7 +57,7 @@ class GazeDetector:
             rightEAR = self.eye_aspect_ratio(rightEye)
 
             frame = frame[max(leftEye[1][1], 0):leftEye[5][1], max(leftEye[0][0], 0):leftEye[3][0]]
-            frame = cv2.resize(frame, (0, 0), fx=8, fy=8)
+            frame = cv2.resize(frame, (0, 0), fx=4, fy=4)
             self.init[0] = int(frame.shape[1] / 2)
             self.init[1] = int(frame.shape[0] / 2)
 

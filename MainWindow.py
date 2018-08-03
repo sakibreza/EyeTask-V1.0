@@ -28,7 +28,7 @@ class MainWindow(QMainWindow):
         # mode 2 = Speech mode
         self.current_mode = 0
 
-        self.cap = cv2.VideoCapture(1)
+        self.cap = cv2.VideoCapture(0)
 
         self.gazeDetector = GazeDetector()
 
