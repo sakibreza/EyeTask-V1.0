@@ -8,11 +8,9 @@ from PyQt5.QtGui import *
 from PyQt5.uic import loadUi
 
 from Speach import Speach
+from WheelChair import WheelChair
 from image_processors.BlinkDetector import BlinkDetector
 from image_processors.GazeDetector import GazeDetector
-
-import os
-from socket import *
 
 
 class MainWindow(QMainWindow):
@@ -20,15 +18,22 @@ class MainWindow(QMainWindow):
         super(MainWindow, self).__init__()
         loadUi("./ui/MainWindow.ui", self)
         self.setWindowTitle("Eye Gaze Detection")
+        self.resetButton.clicked.connect(self.resetAll)
+
         self.currentFocus = 0
         self.__initialize_buttons()
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.updateFrame)
         self.soundThread = None
 
+        self.chair = WheelChair()
+
+        self.current_subprecess = None
+
         # mode 0 = not controlling wheel chair; controlling menu with eye-blink
-        # mode 1 = controling wheel chair with eye-gaze
+        # mode 1 = controling wheel chair with eye-gaze and eye-blink
         # mode 2 = Speech mode
+        # mode 3 = Speech mode for wheel chair
         self.current_mode = 0
 
         self.cap = cv2.VideoCapture(0)
@@ -38,42 +43,74 @@ class MainWindow(QMainWindow):
         self.blinkDetector = BlinkDetector()
         self.initialize_blinkdetector()
 
-        self.speech = Speach()
-        self.initialize_speech()
+        # self.speech = Speach()
+        # self.initialize_speech()
 
         self.timer.start(10)
 
         self.main_image_label.setScaledContents(True)
 
+    def resetAll(self):
+        self.current_mode = 0
+        self.chair.stop()
+        self.chair.is_going = False
+        self.gazeDetector.reset()
+        self.blinkDetector.reset()
+
     def updateFrame(self):
-        gazeDict = {}
-        _, img = self.cap.read()  # numpy.ndarray (480, 640, 3)
-        blink_dict = self.blinkDetector.run_blink_detector(img)
-        outImage = toQImage(blink_dict["image"])
-        outImage = outImage.rgbSwapped()
-        self.main_image_label.setPixmap(QPixmap.fromImage(outImage))
-        self.updateImageInfo(blink_dict)
+        info = {}
 
-        if self.current_mode is 9:
-            gazeDict = self.gazeDetector.get_processed_image(img)
+        if self.current_mode == 0 or self.current_mode == 1:
+            _, img = self.cap.read()
+            blink_dict = self.blinkDetector.run_blink_detector(img)
+            outImage = toQImage(blink_dict["image"])
+            outImage = outImage.rgbSwapped()
+            self.main_image_label.setPixmap(QPixmap.fromImage(outImage))
+            info["left"] = blink_dict["leftTotal"]
+            info["right"] = blink_dict["rightTotal"]
+            info["both"] = blink_dict["bothTotal"]
 
-        elif self.current_mode is 2:
+            if blink_dict["both"]:
+                if self.current_subprecess is not None:
+                    self.current_subprecess.terminate()
+                    self.current_subprecess = None
+
+            if self.current_subprecess is not None:
+                return
+
+            if self.current_mode is 1:
+                gazeDict = self.gazeDetector.get_processed_image(img)
+                info["rightEAR"] = gazeDict["rightEAR"]
+                info["leftEAR"] = gazeDict["leftEAR"]
+                info["dir"] = gazeDict["direction"]
+                if gazeDict["direction"] == "left":
+                    self.chair.left()
+                if gazeDict["direction"] == "right":
+                    self.chair.right()
+                if gazeDict["direction"] == "center":
+                    self.chair.start()
+
+                if blink_dict["left"] or blink_dict["right"]:
+                    self.chair.toggleStartStop()
+
+                elif blink_dict["both"]:
+                    self.chair.stop()
+                    self.chair.is_going = False
+                    self.current_mode = 0
+                    self.gazeDetector.closeAll()
+
+        elif self.current_mode == 2:
             if self.soundThread is None or not self.soundThread.is_alive():
                 self.soundThread = Thread(target=self.speech.recognize_speech_from_mic)
                 self.soundThread.start()
                 print("Started Listening")
 
+        self.updateImageInfo(info)
+
     def updateImageInfo(self, dict):
-        val = "initial = " \
-              + str(dict.get("initial")) \
-              + "\nCurrent = " \
-              + str(dict.get("current")) \
-              + "\nDirection = " \
-              + str(dict.get("direction")) \
-              + "\nAngle = " + str(dict.get("angle")) \
-              + "\nBoth Blink = " + str(dict.get("both")) \
-              + "\nLeft Blink = " + str(dict.get("left")) \
-              + "\nRight Blink = " + str(dict.get("right"))
+        val = ""
+        for key, value in dict.items():
+            val = val + "\n" + str(key) + " : " + str(value)
 
         self.image_info_textlabel.setText(val)
 
@@ -83,11 +120,37 @@ class MainWindow(QMainWindow):
         self.blinkDetector.bothAddCallback(self.pressFocused)
 
     def initialize_speech(self):
-        self.speech.commands["video"].append(self.moveFocusLeft)
-        self.speech.commands["music"].append(self.moveFocusRight)
+        self.speech.commands["video"].append(self.playVideo)
+        self.speech.commands["music"].append(self.playMusic)
+        self.speech.commands["SMS"].append(self.playSMS)
+        self.speech.commands["message"].append(self.playEmail)
+        self.speech.commands["light"].append(self.playLight)
+        self.speech.commands["fan"].append(self.playFan)
+        self.speech.commands["news"].append(self.playBrowser)
+
+        self.speech.commands["start"].append(self.chair.start)
+        self.speech.commands["stop"].append(self.chair.stop)
+        self.speech.commands["right"].append(self.chair.right)
+        self.speech.commands["left"].append(self.chair.left)
+
+        self.speech.commands["close"].append(self.stopCurrentSubprocess)
+
+    def stopCurrentSubprocess(self):
+        if self.current_subprecess is not None:
+            self.current_subprecess.terminate()
 
     def setCurrentMode(self, i):
         self.current_mode = i
+
+    def comboboxIndexChanged(self):
+        if self.selectMethodComboBox.currentIndex() == 0:
+            self.current_mode = 0
+        elif self.selectMethodComboBox.currentIndex() == 1:
+            pass
+        elif self.selectMethodComboBox.currentIndex() == 2:
+            self.current_mode = 2
+        if self.selectMethodComboBox.currentIndex() != 2:
+            self.soundThread = None
 
     def __initialize_buttons(self):
         self.selectMethodComboBox.clear()
@@ -97,8 +160,7 @@ class MainWindow(QMainWindow):
             "Voice-Help"
         ])
         self.selectMethodComboBox.setCurrentIndex(0)
-        self.selectMethodComboBox.currentIndexChanged.connect(
-            lambda: self.setCurrentMode(self.selectMethodComboBox.currentIndex()))
+        self.selectMethodComboBox.currentIndexChanged.connect(self.comboboxIndexChanged)
 
         self.buttons = [self.b1_1, self.b1_2,
                         self.b1_3, self.b2_1,
@@ -108,55 +170,45 @@ class MainWindow(QMainWindow):
             b.setAutoDefault(True)
         self.buttons[self.currentFocus].setFocus(True)
 
-        def playEmail():
-            pass
+        self.b1_1.clicked.connect(self.controlWheel)
+        self.b1_2.clicked.connect(self.playSMS)
+        self.b1_3.clicked.connect(self.playEmail)
+        self.b2_1.clicked.connect(self.playVideo)
+        self.b2_2.clicked.connect(self.playMusic)
+        self.b2_3.clicked.connect(self.playBrowser)
+        self.b3_1.clicked.connect(self.playLight)
+        self.b3_2.clicked.connect(self.playFan)
 
-        def playSMS():
-            pass
+    def playEmail(self):
+        pass
 
-        def controlWheel():
-            self.setCurrentMode(9)
+    def playSMS(self):
+        pass
 
-        def playFan():
-            host = "192.168.1.4" # set to IP address of target computer
-            port = 13000
-            addr = (host, port) 
-            UDPSock = socket(AF_INET, SOCK_DGRAM)
-            UDPSock.sendto(bytes('fan'.encode()), addr)
-            UDPSock.close()
+    def controlWheel(self):
+        self.setCurrentMode(9)
 
-        def playLight():
-            host = "192.168.1.4" # set to IP address of target computer
-            port = 13000
-            addr = (host, port) 
-            UDPSock = socket(AF_INET, SOCK_DGRAM)
-            UDPSock.sendto(bytes('light'.encode()), addr)
-            UDPSock.close()
+    def playFan(self):
+        self.chair.playFan()
 
-        def playBrowser():
-            import webbrowser
-            webbrowser.open_new_tab("http://epaperna.prothomalo.com/")
+    def playLight(self):
+        self.chair.playLight()
 
-        def playMusic():
-            import os, random, subprocess
-            randomfile = random.choice(os.listdir("/home/insaneshadow/Music"))
-            file = "/home/insaneshadow/Music/" + randomfile
-            subprocess.call(['deepin-music', file])
+    def playBrowser(self):
+        import webbrowser
+        webbrowser.open_new_tab("http://epaperna.prothomalo.com/")
 
-        def playVideo():
-            import os, random, subprocess
-            randomfile = random.choice(os.listdir("/home/insaneshadow/Videos"))
-            file = "/home/insaneshadow/Videos/" + randomfile
-            subprocess.call(['vlc', file])
+    def playMusic(self):
+        import os, random, subprocess
+        randomfile = random.choice(os.listdir("/home/insaneshadow/Music"))
+        file = "/home/insaneshadow/Music/" + randomfile
+        self.current_subprecess = subprocess.Popen(['deepin-music', file])
 
-        self.b1_1.clicked.connect(controlWheel)
-        self.b1_2.clicked.connect(playSMS)
-        self.b1_3.clicked.connect(playEmail)
-        self.b2_1.clicked.connect(playVideo)
-        self.b2_2.clicked.connect(playMusic)
-        self.b2_3.clicked.connect(playBrowser)
-        self.b3_1.clicked.connect(playLight)
-        self.b3_2.clicked.connect(playFan)
+    def playVideo(self):
+        import os, random, subprocess
+        randomfile = random.choice(os.listdir("/home/insaneshadow/Videos"))
+        file = "/home/insaneshadow/Videos/" + randomfile
+        self.current_subprecess = subprocess.Popen(['vlc', file])
 
     def moveFocusRight(self):
         self.currentFocus = (self.currentFocus + 1) % 8

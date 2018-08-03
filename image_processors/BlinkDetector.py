@@ -38,7 +38,10 @@ class BlinkDetector:
         (self.rStart, self.rEnd) = face_utils.FACIAL_LANDMARKS_IDXS["right_eye"]
 
     def run_blink_detector(self, frame):
-        retDict = {"eyegaze": None}
+        retDict = {"eyegaze": None,
+                   "both": False,
+                   "left": False,
+                   "right": False}
 
         frame = cv2.resize(frame, (640, 450))
         frame = cv2.flip(frame, 1)
@@ -90,6 +93,7 @@ class BlinkDetector:
             # then increment the total number of blinks
             if self.BOTH_COUNTER >= self.EYE_AR_CONSEC_FRAMES:
                 self.TOTAL += 1
+                retDict["both"] = True
                 self.COUNTER_R = 0
                 self.COUNTER_L = 0
                 self.BOTH_COUNTER = 0
@@ -98,6 +102,7 @@ class BlinkDetector:
 
             if self.COUNTER_L >= self.EYE_AR_CONSEC_FRAMES:
                 self.TOTAL_L += 1
+                retDict["left"] = True
                 self.COUNTER_L = 0
                 self.COUNTER_R = 0
                 self.BOTH_COUNTER = 0
@@ -106,6 +111,7 @@ class BlinkDetector:
 
             if self.COUNTER_R >= self.EYE_AR_CONSEC_FRAMES:
                 self.TOTAL_R += 1
+                retDict["right"] = True
                 self.COUNTER_L = 0
                 self.COUNTER_R = 0
                 self.BOTH_COUNTER = 0
@@ -117,10 +123,10 @@ class BlinkDetector:
             self.draw_in_frame(frame, leftEye, rightEye)
 
         cv2.flip(frame, 0)
+        retDict["bothTotal"] = self.TOTAL
+        retDict["leftTotal"] = self.TOTAL_L
+        retDict["rightTotal"] = self.TOTAL_R
         retDict["image"] = frame
-        retDict["both"] = self.TOTAL
-        retDict["left"] = self.TOTAL_L
-        retDict["right"] = self.TOTAL_R
         return retDict
 
     def draw_in_frame(self, frame, leftEye, rightEye):
@@ -160,6 +166,14 @@ class BlinkDetector:
 
     def bothAddCallback(self, callbacks=None):
         self.callbacks["both"].append(callbacks)
+
+    def reset(self):
+        self.BOTH_COUNTER = 0
+        self.COUNTER_L = 0
+        self.COUNTER_R = 0
+        self.TOTAL = 0
+        self.TOTAL_L = 0
+        self.TOTAL_R = 0
 
 
 def eye_aspect_ratio(eye):

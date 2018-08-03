@@ -28,6 +28,8 @@ class GazeDetector:
         (self.rStart, self.rEnd) = face_utils.FACIAL_LANDMARKS_IDXS["right_eye"]
 
     def get_processed_image(self, frame):
+        ret = {"rightEAR": -1, "leftEAR": -1}
+
         frame = cv2.resize(frame, (640, 450))
         frame = cv2.flip(frame, 1)
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -55,6 +57,8 @@ class GazeDetector:
             rightEye = shape[self.lStart:self.lEnd]
             leftEAR = self.eye_aspect_ratio(leftEye)
             rightEAR = self.eye_aspect_ratio(rightEye)
+            ret["leftEAR"] = leftEAR
+            ret["rightEAR"] = rightEAR
 
             frame = frame[max(leftEye[1][1], 0):leftEye[5][1], max(leftEye[0][0], 0):leftEye[3][0]]
             frame = cv2.resize(frame, (0, 0), fx=4, fy=4)
@@ -77,13 +81,13 @@ class GazeDetector:
 
         for (x, y, w, h) in eye:
             self.coordinate = [int(x + w / 2), int(y + h / 2)]
-            print("-----")
-            print("initial = " + str(self.init))
-            print("current = " + str(self.coordinate))
-            dir = self.direction(self.init, self.coordinate)
-            print("direction = " + dir)
-            angle = self.getangle(self.init, self.coordinate)
-            print("angle = " + angle)
+            # print("-----")
+            # print("initial = " + str(self.init))
+            # print("current = " + str(self.coordinate))
+            # dir = self.direction(self.init, self.coordinate)
+            # print("direction = " + dir)
+            # angle = self.getangle(self.init, self.coordinate)
+            # print("angle = " + angle)
 
             font = cv2.FONT_HERSHEY_SIMPLEX
             bottomLeftCornerOfTextc = (20, 30)
@@ -132,8 +136,12 @@ class GazeDetector:
                                       lineType)
 
             cv2.imshow("eye_gaze", img)
-        ret = {"image": img, "initial": self.init, "current": self.coordinate, "direction": self.direction(self.init, self.coordinate),
-               "angle": self.getangle(self.init, self.coordinate)}
+
+        ret["image"] = img
+        ret["initial"] = self.init
+        ret["current"] = self.coordinate
+        ret["direction"] = self.direction(self.init, self.coordinate)
+        ret["angle"] = self.getangle(self.init, self.coordinate)
 
         return ret
 
@@ -181,3 +189,13 @@ class GazeDetector:
 
         # return the eye aspect ratio
         return ear
+
+    def reset(self):
+        self.init = [0, 0]
+        self.coordinate = [0, 0]
+        self.dir_c = 0
+        self.dir_l = 0
+        self.dir_r = 0
+
+    def closeAll(self):
+        cv2.destroyAllWindows()

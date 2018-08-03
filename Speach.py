@@ -7,13 +7,18 @@ class Speach:
         self.microphone = sr.Microphone()
 
         self.commands = {
-            "wheelchair": {"start": [], "left": [], "right": [], "stop": []},
+            "start": [],
+            "stop": [],
+            "left": [],
+            "right": [],
             "video": [],
             "SMS": [],
             "music": [],
             "message": [],
             "light": [],
-            "fan": []
+            "fan": [],
+            "news": [],
+            "wheel chair": []
         }
         # self.video = []
         # self.sms = []
