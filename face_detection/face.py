@@ -6,6 +6,12 @@ face_cascade = cv2.CascadeClassifier('face.xml')
 cap = cv2.VideoCapture(0)
 init = [0,0]
 coordinate = [0,0]
+dir_c = 0
+dir_l = 0
+dir_r = 0
+dir_u = 0
+dir_d = 0
+conf = 5
 
 
 # flag = 0 for only center/left/right
@@ -77,43 +83,73 @@ while 1:
 		lineType               = 2
 		
 		if dir == "center" :
-			img = cv2.putText(img,'< Center >', 
-			bottomLeftCornerOfTextc, 
-			font, 
-			fontScale,
-			fontColor,
-			lineType)
+			dir_c += 1
+			if dir_c > conf :
+				dir_l = 0
+				dir_r = 0
+				dir_u = 0
+				dir_d = 0
+				img = cv2.putText(img,'< Center >', 
+				bottomLeftCornerOfTextc, 
+				font, 
+				fontScale,
+				fontColor,
+				lineType)
 		elif dir == "right" :
-			img = cv2.putText(img,'Right >', 
-			bottomLeftCornerOfTextr, 
-			font, 
-			fontScale,
-			fontColor,
-			lineType)
+			dir_r += 1
+			if dir_r > conf :
+				dir_l = 0
+				dir_c = 0
+				dir_u = 0
+				dir_d = 0
+				img = cv2.putText(img,'Right >', 
+				bottomLeftCornerOfTextr, 
+				font, 
+				fontScale,
+				fontColor,
+				lineType)
 		
 		elif dir == "left" :
-			img = cv2.putText(img,'< left', 
-			bottomLeftCornerOfTextl, 
-			font, 
-			fontScale,
-			fontColor,
-			lineType)
+			dir_l += 1
+			if dir_l > conf :
+				dir_c = 0
+				dir_r = 0
+				dir_u = 0
+				dir_d = 0
+				img = cv2.putText(img,'< left', 
+				bottomLeftCornerOfTextl, 
+				font, 
+				fontScale,
+				fontColor,
+				lineType)
 		
 		elif dir == "up" :
-			img = cv2.putText(img,'< Up >', 
-			bottomLeftCornerOfTextc, 
-			font, 
-			fontScale,
-			fontColor,
-			lineType)
+			dir_u += 1
+			if dir_u > conf :
+				dir_l = 0
+				dir_r = 0
+				dir_c = 0
+				dir_d = 0
+				img = cv2.putText(img,'< Up >', 
+				bottomLeftCornerOfTextc, 
+				font, 
+				fontScale,
+				fontColor,
+				lineType)
 		
 		elif dir == "down" :
-			img = cv2.putText(img,'< Down >', 
-			bottomLeftCornerOfTextc, 
-			font, 
-			fontScale,
-			fontColor,
-			lineType)
+			dir_d += 1
+			if dir_d > conf :
+				dir_l = 0
+				dir_r = 0
+				dir_c = 0
+				dir_d = 0
+				img = cv2.putText(img,'< Down >', 
+				bottomLeftCornerOfTextc, 
+				font, 
+				fontScale,
+				fontColor,
+				lineType)
 		
 	cv2.imshow('img',img)
 	k = cv2.waitKey(30) & 0xff
