@@ -60,7 +60,6 @@ class MainWindow(QMainWindow):
 
     def updateFrame(self):
         info = {}
-
         if self.current_mode == 0 or self.current_mode == 1:
             _, img = self.cap.read()
             blink_dict = self.blinkDetector.run_blink_detector(img)
@@ -151,6 +150,7 @@ class MainWindow(QMainWindow):
             pass
         elif self.selectMethodComboBox.currentIndex() == 2:
             self.current_mode = 2
+            self.chair.is_going = True
         if self.selectMethodComboBox.currentIndex() != 2:
             self.soundThread = None
 
