@@ -73,6 +73,8 @@ class BlinkDetector:
 
             # TODO: same for both
 
+            retDict["leftEAR"] = round(leftEAR, 2)
+            retDict["rightEAR"] = round(rightEAR, 2)
             # both
             if leftEAR < self.EYE_AR_THRESH - 0.02 and rightEAR < self.EYE_AR_THRESH - 0.02:
                 self.BOTH_COUNTER += 1
@@ -137,26 +139,6 @@ class BlinkDetector:
 
         cv2.drawContours(frame, [leftEyeHull], -1, (0, 255, 0), 1)
         cv2.drawContours(frame, [rightEyeHull], -1, (0, 255, 0), 1)
-
-        # draw the total number of blinks on the frame along with
-        # the computed eye aspect ratio for the frame
-        # cv2.putText(frame, "Both Blinks: {}".format(self.TOTAL), (10, 30),
-        #             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
-        #
-        # cv2.putText(frame, "Left Blinks: {}".format(self.TOTAL_L), (10, 60),
-        #             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
-        #
-        # cv2.putText(frame, "Right Blinks: {}".format(self.TOTAL_R), (10, 90),
-        #             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
-        #
-        # cv2.putText(frame, "EAR: {:.2f}".format(ear), (300, 30),
-        #             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
-        #
-        # cv2.putText(frame, "L-EAR: {:.2f}".format(leftEAR), (10, 300),
-        #             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
-        #
-        # cv2.putText(frame, "R-EAR: {:.2f}".format(rightEAR), (300, 300),
-        #             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
 
     def leftAddCallback(self, callbacks=None):
         self.callbacks["left"].append(callbacks)

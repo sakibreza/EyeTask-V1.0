@@ -70,6 +70,9 @@ class MainWindow(QMainWindow):
             info["left"] = blink_dict["leftTotal"]
             info["right"] = blink_dict["rightTotal"]
             info["both"] = blink_dict["bothTotal"]
+            info["rightEAR"] = blink_dict["rightEAR"]
+            info["leftEAR"] = blink_dict["leftEAR"]
+            info["avgEAR"] = (blink_dict["rightEAR"] + blink_dict["leftEAR"]) / 2
 
             if blink_dict["both"]:
                 if self.current_subprecess is not None:
@@ -81,8 +84,6 @@ class MainWindow(QMainWindow):
 
             if self.current_mode is 1:
                 gazeDict = self.gazeDetector.get_processed_image(img)
-                info["rightEAR"] = gazeDict["rightEAR"]
-                info["leftEAR"] = gazeDict["leftEAR"]
                 info["dir"] = gazeDict["direction"]
                 if gazeDict["direction"] == "left":
                     self.chair.left()

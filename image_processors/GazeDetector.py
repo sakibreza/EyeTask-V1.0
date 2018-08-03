@@ -28,7 +28,7 @@ class GazeDetector:
         (self.rStart, self.rEnd) = face_utils.FACIAL_LANDMARKS_IDXS["right_eye"]
 
     def get_processed_image(self, frame):
-        ret = {"rightEAR": -1, "leftEAR": -1}
+        ret = {}
 
         frame = cv2.resize(frame, (640, 450))
         frame = cv2.flip(frame, 1)
@@ -37,7 +37,7 @@ class GazeDetector:
         # detect faces in the grayscale frame
         rects = self.detector(gray, 0)
         rectCounter = 0
-        for rect in rects:
+        for _ in rects:
             rectCounter += 1
 
         if rectCounter is 0:
@@ -55,10 +55,6 @@ class GazeDetector:
             # coordinates to compute the eye aspect ratio for both eyes
             leftEye = shape[self.rStart:self.rEnd]
             rightEye = shape[self.lStart:self.lEnd]
-            leftEAR = self.eye_aspect_ratio(leftEye)
-            rightEAR = self.eye_aspect_ratio(rightEye)
-            ret["leftEAR"] = leftEAR
-            ret["rightEAR"] = rightEAR
 
             frame = frame[max(leftEye[1][1], 0):leftEye[5][1], max(leftEye[0][0], 0):leftEye[3][0]]
             frame = cv2.resize(frame, (0, 0), fx=4, fy=4)
