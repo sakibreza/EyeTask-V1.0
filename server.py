@@ -6,23 +6,22 @@ import RPi.GPIO as GPIO
 from socket import *
 
 
-def init_pins():
-    left_speed = 21
-    right_speed = 22
 
-    leftMotor = {'+': 11, '-': 7}
-    rightMotor = {'+': 15, '-': 13}
+left_speed = 21
+right_speed = 22
+leftMotor = {'+': 11, '-': 7}
+rightMotor = {'+': 15, '-': 13}
 
-    GPIO.setmode(GPIO.BOARD)
-    GPIO.setup(7, GPIO.OUT)
-    GPIO.setup(11, GPIO.OUT)
-    GPIO.setup(13, GPIO.OUT)
-    GPIO.setup(15, GPIO.OUT)
-    GPIO.setup(21, GPIO.OUT)
-    GPIO.setup(22, GPIO.OUT)
+GPIO.setmode(GPIO.BOARD)
+GPIO.setup(7, GPIO.OUT)
+GPIO.setup(11, GPIO.OUT)
+GPIO.setup(13, GPIO.OUT)
+GPIO.setup(15, GPIO.OUT)
+GPIO.setup(21, GPIO.OUT)
+GPIO.setup(22, GPIO.OUT)
 
-    GPIO.PWM(left_speed, 2000).start(21)
-    GPIO.PWM(right_speed, 2000).start(22)
+GPIO.PWM(left_speed, 2000).start(21)
+GPIO.PWM(right_speed, 2000).start(22)
 
 
 def leftMotorGo(dir):
@@ -66,8 +65,7 @@ def right():
 
 
 def main():
-    init_pins()
-    host = "192,168.1.4"
+    host = "192.168.1.4"
     port = 13000
     buf = 1024
     addr = (host, port)
