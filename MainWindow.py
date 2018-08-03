@@ -1,21 +1,15 @@
 from threading import Thread
-
 import cv2
 import smtplib
-
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.uic import loadUi
-
 from Speach import Speach
 from WheelChair import WheelChair
 from image_processors.BlinkDetector import BlinkDetector
 from image_processors.GazeDetector import GazeDetector
-
-
 from zeep import Client
-
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
@@ -50,8 +44,8 @@ class MainWindow(QMainWindow):
         self.blinkDetector = BlinkDetector()
         self.initialize_blinkdetector()
 
-        # self.speech = Speach()
-        # self.initialize_speech()
+        self.speech = Speach()
+        self.initialize_speech()
 
         self.timer.start(10)
 
@@ -177,27 +171,6 @@ class MainWindow(QMainWindow):
             b.setAutoDefault(True)
         self.buttons[self.currentFocus].setFocus(True)
 
-        def playEmail():
-            try:
-                fromaddr = 'eyegaze.kuet@gmail.com'
-                toaddr = 'sakibreza1@gmail.com'
-                msg = MIMEMultipart()
-                msg['From'] = fromaddr
-                msg['To'] = toaddr
-                msg['Subject'] = 'Doctor Appointment'
-                 
-                body = 'I am facing problem.Please come to see me if you are free.'
-                msg.attach(MIMEText(body, 'plain'))
-                 
-                server = smtplib.SMTP('smtp.gmail.com', 587)
-                server.starttls()
-                server.login(fromaddr, '060701cse')
-                text = msg.as_string()
-                server.sendmail(fromaddr, toaddr, text)
-                server.quit()
-                print('Email Sent Successfully')
-            except:    
-                print('Email not sent')
         self.b1_1.clicked.connect(self.controlWheel)
         self.b1_2.clicked.connect(self.playSMS)
         self.b1_3.clicked.connect(self.playEmail)
@@ -207,32 +180,55 @@ class MainWindow(QMainWindow):
         self.b3_1.clicked.connect(self.playLight)
         self.b3_2.clicked.connect(self.playFan)
 
-
-        def playSMS():
-            try:
-                url = 'https://api2.onnorokomsms.com/sendsms.asmx?WSDL' 
-                client = Client(url) 
-                userName = '01516111574' 
-                password = '54124' 
-                recipientNumber = '01521323429' 
-                smsText = 'Hello Eygaze' 
-                smsType = 'TEXT' 
-                maskName = '' 
-                campaignName = '' 
-                client.service.OneToOne(userName,password,recipientNumber,smsText,smsType,maskName,campaignName)
-                print('SMS sent!')
-            except:
-                print('SMS nor sent!')
-        def controlWheel():
-            self.setCurrentMode(9)
+    def playSMS(self):
+        try:
+            url = 'https://api2.onnorokomsms.com/sendsms.asmx?WSDL'
+            client = Client(url)
+            userName = '01516111574'
+            password = '54124'
+            recipientNumber = '01521323429'
+            smsText = 'Hello Eygaze'
+            smsType = 'TEXT'
+            maskName = ''
+            campaignName = ''
+            client.service.OneToOne(userName, password, recipientNumber, smsText, smsType, maskName, campaignName)
+            print('SMS sent!')
+        except Exception as e:
+            print('SMS nor sent!')
+            print(e)
 
     def controlWheel(self):
-        self.setCurrentMode(9)
+        self.setCurrentMode(1)
+
+    def playEmail(self):
+        try:
+            fromaddr = 'eyegaze.kuet@gmail.com'
+            toaddr = 'sakibreza1@gmail.com'
+            msg = MIMEMultipart()
+            msg['From'] = fromaddr
+            msg['To'] = toaddr
+            msg['Subject'] = 'Doctor Appointment'
+
+            body = 'I am facing problem.Please come to see me if you are free.'
+            msg.attach(MIMEText(body, 'plain'))
+
+            server = smtplib.SMTP('smtp.gmail.com', 587)
+            server.starttls()
+            server.login(fromaddr, '060701cse')
+            text = msg.as_string()
+            server.sendmail(fromaddr, toaddr, text)
+            server.quit()
+            print('Email Sent Successfully')
+        except Exception as e:
+            print('Email not sent')
+            print(e)
 
     def playFan(self):
+        print("playing Fan")
         self.chair.playFan()
 
     def playLight(self):
+        print("playing Light")
         self.chair.playLight()
 
     def playBrowser(self):
@@ -260,11 +256,11 @@ class MainWindow(QMainWindow):
         self.buttons[self.currentFocus].setFocus(True)
 
     def moveFocusUp(self):
-        self.currentFocus = (self.currentFocus + 3) % 8
+        self.currentFocus = (self.currentFocus + 2) % 8
         self.buttons[self.currentFocus].setFocus(True)
 
     def moveFocusDown(self):
-        self.currentFocus = (self.currentFocus - 3) % 8
+        self.currentFocus = (self.currentFocus - 2) % 8
         self.buttons[self.currentFocus].setFocus(True)
 
     def pressFocused(self):
