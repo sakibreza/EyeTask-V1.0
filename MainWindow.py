@@ -1,6 +1,7 @@
 from threading import Thread
 
 import cv2
+import smtplib
 
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
@@ -13,6 +14,11 @@ from image_processors.GazeDetector import GazeDetector
 
 import os
 from socket import *
+
+from zeep import Client
+
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 
 class MainWindow(QMainWindow):
@@ -31,7 +37,7 @@ class MainWindow(QMainWindow):
         # mode 2 = Speech mode
         self.current_mode = 0
 
-        self.cap = cv2.VideoCapture(0)
+        self.cap = cv2.VideoCapture(1)
 
         self.gazeDetector = GazeDetector()
 
@@ -109,11 +115,43 @@ class MainWindow(QMainWindow):
         self.buttons[self.currentFocus].setFocus(True)
 
         def playEmail():
-            pass
+            try:
+                fromaddr = 'eyegaze.kuet@gmail.com'
+                toaddr = 'sakibreza1@gmail.com'
+                msg = MIMEMultipart()
+                msg['From'] = fromaddr
+                msg['To'] = toaddr
+                msg['Subject'] = 'Doctor Appointment'
+                 
+                body = 'I am facing problem.Please come to see me if you are free.'
+                msg.attach(MIMEText(body, 'plain'))
+                 
+                server = smtplib.SMTP('smtp.gmail.com', 587)
+                server.starttls()
+                server.login(fromaddr, '060701cse')
+                text = msg.as_string()
+                server.sendmail(fromaddr, toaddr, text)
+                server.quit()
+                print('Email Sent Successfully')
+            except:    
+                print('Email not sent')
+
 
         def playSMS():
-            pass
-
+            try:
+                url = 'https://api2.onnorokomsms.com/sendsms.asmx?WSDL' 
+                client = Client(url) 
+                userName = '01516111574' 
+                password = '54124' 
+                recipientNumber = '01521323429' 
+                smsText = 'Hello Eygaze' 
+                smsType = 'TEXT' 
+                maskName = '' 
+                campaignName = '' 
+                client.service.OneToOne(userName,password,recipientNumber,smsText,smsType,maskName,campaignName)
+                print('SMS sent!')
+            except:
+                print('SMS nor sent!')
         def controlWheel():
             self.setCurrentMode(9)
 
