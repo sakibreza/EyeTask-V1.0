@@ -7,7 +7,11 @@ cap = cv2.VideoCapture(0)
 init = [0,0]
 coordinate = [0,0]
 
-def direction (ini,cur) :
+
+# flag = 0 for only center/left/right
+# flag = 1 for center/left/right/up/down
+
+def direction (ini,cur,flag=1) : 
 	ix = ini[0]
 	iy = ini[1]
 	cx = cur[0]
@@ -16,7 +20,15 @@ def direction (ini,cur) :
 	if init == [0,0] :
 		return "not initialized"
 	elif cx<=ix+rad and cx>=ix-rad :
-		return "center"
+		if flag == 0 :
+			return "center"
+		elif flag == 1 and cy>=iy+rad :
+			return "down"
+		elif flag == 1 and cy<=iy-rad :
+			return "up"
+		else :
+			return "center"
+			
 	elif cx>=ix+rad :
 		return "right"
 	elif cx<=ix-rad :
@@ -86,9 +98,27 @@ while 1:
 			fontScale,
 			fontColor,
 			lineType)
-			
+		
+		elif dir == "up" :
+			img = cv2.putText(img,'< Up >', 
+			bottomLeftCornerOfTextc, 
+			font, 
+			fontScale,
+			fontColor,
+			lineType)
+		
+		elif dir == "down" :
+			img = cv2.putText(img,'< Down >', 
+			bottomLeftCornerOfTextc, 
+			font, 
+			fontScale,
+			fontColor,
+			lineType)
+		
 	cv2.imshow('img',img)
 	k = cv2.waitKey(30) & 0xff
+	
+	# init is happening here for pressing 'i', you've to do it using eye blinks
 	if k == 105:
 		init = [int(x+w/2),int(y+h/2)]
 	elif k == 27:
