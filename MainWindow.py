@@ -1,18 +1,20 @@
-from threading import Thread
-import cv2
 import smtplib
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.uic import loadUi
-from Speach import Speach
-from WheelChair import WheelChair
-from image_processors.FaceDetector import FaceDetector
-from image_processors.BlinkDetector import BlinkDetector
-from image_processors.GazeDetector import GazeDetector
-from zeep import Client
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from threading import Thread
+
+import cv2
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
+from PyQt5.uic import loadUi
+from zeep import Client
+
+from Speach import Speach
+from WheelChair import WheelChair
+from image_processors.BlinkDetector import BlinkDetector
+from image_processors.FaceDetector import FaceDetector
+from image_processors.GazeDetector import GazeDetector
 
 
 class MainWindow(QMainWindow):
@@ -294,27 +296,27 @@ class MainWindow(QMainWindow):
         self.current_subprecess = subprocess.Popen(['vlc', file])
 
     def moveFocusRight(self):
-        if self.current_subprecess is None or self.current_mode != 1 or self.current_mode != 3:
+        if self.current_subprecess is None and self.current_mode != 1 and self.current_mode != 4:
             self.currentFocus = (self.currentFocus + 1) % 8
             self.buttons[self.currentFocus].setFocus(True)
 
     def moveFocusLeft(self):
-        if self.current_subprecess is None or self.current_mode != 1 or self.current_mode != 3:
+        if self.current_subprecess is None and self.current_mode != 1 and self.current_mode != 4:
             self.currentFocus = (self.currentFocus - 1) % 8
             self.buttons[self.currentFocus].setFocus(True)
 
     def moveFocusUp(self):
-        if  self.current_subprecess is None or self.current_mode != 1 or self.current_mode != 3:
+        if  self.current_subprecess is None and self.current_mode != 1 and self.current_mode != 4:
             self.currentFocus = (self.currentFocus + 2) % 8
             self.buttons[self.currentFocus].setFocus(True)
 
     def moveFocusDown(self):
-        if  self.current_subprecess is None or self.current_mode != 1 or self.current_mode != 3:
+        if  self.current_subprecess is None and self.current_mode != 1 and self.current_mode != 4:
             self.currentFocus = (self.currentFocus - 2) % 8
             self.buttons[self.currentFocus].setFocus(True)
 
     def pressFocused(self):
-        if self.current_subprecess is None or self.current_mode != 1 or self.current_mode != 3:
+        if self.current_subprecess is None and self.current_mode != 1 and self.current_mode != 4:
             self.buttons[self.currentFocus].animateClick()
 
 

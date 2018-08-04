@@ -15,7 +15,7 @@ class BlinkDetector:
         # define two constants, one for the eye aspect ratio to indicate
         # blink and then a second constant for the number of consecutive
         # frames the eye must be below the threshold
-        self.EYE_AR_THRESH = 0.27
+        self.EYE_AR_THRESH = 0.25
         self.EYE_AR_CONSEC_FRAMES = 5
 
         # initialize the frame counters and the total number of blinks
