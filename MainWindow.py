@@ -48,8 +48,8 @@ class MainWindow(QMainWindow):
         self.blinkDetector = BlinkDetector()
         self.initialize_blinkdetector()
 
-        # self.speech = Speach()
-        # self.initialize_speech()
+        self.speech = Speach()
+        self.initialize_speech()
 
         self.timer.start(10)
 
