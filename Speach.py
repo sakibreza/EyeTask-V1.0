@@ -16,7 +16,7 @@ class Speach:
             "music": [],
             "message": [],
             "light": [],
-            "fan": [],
+            "ceiling fan": [],
             "news": [],
             "wheel chair": [],
 			"close" : []
@@ -52,5 +52,7 @@ class Speach:
 
         else:
             print(response["transcription"])
+            for func in self.commands["stop"]:
+                func()
 
         return response

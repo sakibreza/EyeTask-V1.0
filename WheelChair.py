@@ -24,11 +24,11 @@ class WheelChair:
     def toggleStartStop(self):
         if self.is_going is True:
             print("disable")
-            # self.socket.sendto(bytes('stop'.encode()), self.addr)
+            self.socket.sendto(bytes('stop'.encode()), self.addr)
             self.is_going = False
         else:
             print("enable")
-            # self.socket.sendto(bytes('start'.encode()), self.addr)
+            self.socket.sendto(bytes('start'.encode()), self.addr)
             self.is_going = True
 
     def left(self):

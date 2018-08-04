@@ -16,7 +16,7 @@ class BlinkDetector:
         # blink and then a second constant for the number of consecutive
         # frames the eye must be below the threshold
         self.EYE_AR_THRESH = 0.25
-        self.EYE_AR_CONSEC_FRAMES = 5
+        self.EYE_AR_CONSEC_FRAMES = 6
 
         # initialize the frame counters and the total number of blinks
         self.BOTH_COUNTER = 0
@@ -39,6 +39,7 @@ class BlinkDetector:
 
     def run_blink_detector(self, frame, eyeThresh):
         self.EYE_AR_THRESH = eyeThresh
+        #print(eyeThresh)
         retDict = {"eyegaze": None,
                    "both": False,
                    "left": False,

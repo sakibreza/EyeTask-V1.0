@@ -125,6 +125,7 @@ class MainWindow(QMainWindow):
                     self.moveFocusDown()
 
             elif self.current_mode == 4:
+                self.chair.is_going = True
                 faceDict = self.faceDetector.get_processed_image(img)
                 self.main_image_label.setText("Chair wheel Mode"
                                               "\n\n Press right eye to initialize"
@@ -142,8 +143,8 @@ class MainWindow(QMainWindow):
                     self.chair.start()
                 elif faceDict["direction"] == "down":
                     self.chair.stop()
-                # elif faceDict["direction"] == "center":
-                #     self.chair.stop()
+                elif faceDict["direction"] == "center":
+                     self.chair.stop()
 
         elif self.current_mode == 2:
             if self.soundThread is None or not self.soundThread.is_alive():
@@ -172,7 +173,7 @@ class MainWindow(QMainWindow):
         self.speech.commands["SMS"].append(self.playSMS)
         self.speech.commands["message"].append(self.playEmail)
         self.speech.commands["light"].append(self.playLight)
-        self.speech.commands["fan"].append(self.playFan)
+        self.speech.commands["ceiling fan"].append(self.playFan)
         self.speech.commands["news"].append(self.playBrowser)
 
         self.speech.commands["start"].append(self.chair.start)
