@@ -291,9 +291,9 @@ class MainWindow(QMainWindow):
 
     def playVideo(self):
         import os, random, subprocess
-        randomfile = random.choice(os.listdir("/home/insaneshadow/Videos"))
-        file = "/home/insaneshadow/Videos/" + randomfile
-        self.current_subprecess = subprocess.Popen(['vlc', file])
+        randomfile = random.choice(os.listdir("F:\\HD\\"))
+        file = "F:\\HD\\" + randomfile
+        self.current_subprecess = subprocess.Popen(["C:\Program Files\Windows Media Player\wmplayer.exe", file])
 
     def moveFocusRight(self):
         if self.current_subprecess is None and self.current_mode != 1 and self.current_mode != 4:
