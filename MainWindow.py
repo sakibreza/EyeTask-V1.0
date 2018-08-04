@@ -286,14 +286,14 @@ class MainWindow(QMainWindow):
 
     def playMusic(self):
         import os, random, subprocess
-        randomfile = random.choice(os.listdir("/home/insaneshadow/Music"))
-        file = "/home/insaneshadow/Music/" + randomfile
-        self.current_subprecess = subprocess.Popen(['deepin-music', file])
+        randomfile = random.choice(os.listdir("F:\\music\\"))
+        file = "F:\\music\\" + randomfile
+        self.current_subprecess = subprocess.Popen(["C:\Program Files\Windows Media Player\wmplayer.exe", file])
 
     def playVideo(self):
         import os, random, subprocess
-        randomfile = random.choice(os.listdir("F:\\HD\\"))
-        file = "F:\\HD\\" + randomfile
+        randomfile = random.choice(os.listdir("F:\\video\\"))
+        file = "F:\\video\\" + randomfile
         self.current_subprecess = subprocess.Popen(["C:\Program Files\Windows Media Player\wmplayer.exe", file])
 
     def moveFocusRight(self):
