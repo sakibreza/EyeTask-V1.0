@@ -10,8 +10,6 @@ from scipy.spatial import distance as dist
 class BlinkDetector:
     def __init__(self):
 
-        self.callbacks = {"left": [], "right": [], "both": []}
-
         # define two constants, one for the eye aspect ratio to indicate
         # blink and then a second constant for the number of consecutive
         # frames the eye must be below the threshold
@@ -103,8 +101,6 @@ class BlinkDetector:
                 self.COUNTER_R = 0
                 self.COUNTER_L = 0
                 self.BOTH_COUNTER = 0
-                for func in self.callbacks["both"]:
-                    func()
 
             if self.COUNTER_L >= self.EYE_AR_CONSEC_FRAMES:
                 self.TOTAL_L += 1
@@ -112,8 +108,6 @@ class BlinkDetector:
                 self.COUNTER_L = 0
                 self.COUNTER_R = 0
                 self.BOTH_COUNTER = 0
-                for func in self.callbacks["left"]:
-                    func()
 
             if self.COUNTER_R >= self.EYE_AR_CONSEC_FRAMES:
                 self.TOTAL_R += 1
@@ -121,8 +115,6 @@ class BlinkDetector:
                 self.COUNTER_L = 0
                 self.COUNTER_R = 0
                 self.BOTH_COUNTER = 0
-                for func in self.callbacks["right"]:
-                    func()
 
             retDict["EAR_left"] = leftEAR
             retDict["EAR_right"] = rightEAR
@@ -143,15 +135,6 @@ class BlinkDetector:
 
         cv2.drawContours(frame, [leftEyeHull], -1, (0, 255, 0), 1)
         cv2.drawContours(frame, [rightEyeHull], -1, (0, 255, 0), 1)
-
-    def leftAddCallback(self, callbacks=None):
-        self.callbacks["left"].append(callbacks)
-
-    def rightAddCallback(self, callbacks=None):
-        self.callbacks["right"].append(callbacks)
-
-    def bothAddCallback(self, callbacks=None):
-        self.callbacks["both"].append(callbacks)
 
     def reset(self):
         self.BOTH_COUNTER = 0

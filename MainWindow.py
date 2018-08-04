@@ -48,7 +48,6 @@ class MainWindow(QMainWindow):
         self.gazeDetector = GazeDetector()
 
         self.blinkDetector = BlinkDetector()
-        self.initialize_blinkdetector()
 
         self.speech = Speach()
         self.initialize_speech()
@@ -87,8 +86,15 @@ class MainWindow(QMainWindow):
 
             if self.current_subprecess is not None:
                 return
+            if self.current_mode is 0:
+                if blink_dict["left"]:
+                    self.moveFocusLeft()
+                if blink_dict["right"]:
+                    self.moveFocusRight()
+                if blink_dict["both"]:
+                    self.pressFocused()
 
-            if self.current_mode is 1:
+            elif self.current_mode is 1:
                 gazeDict = self.gazeDetector.get_processed_image(img)
                 info["dir"] = gazeDict["direction"]
                 if gazeDict["direction"] == "left":
@@ -161,11 +167,6 @@ class MainWindow(QMainWindow):
             val = val + "\n" + str(key) + " : " + str(value)
 
         self.image_info_textlabel.setText(val)
-
-    def initialize_blinkdetector(self):
-        self.blinkDetector.leftAddCallback(self.moveFocusLeft)
-        self.blinkDetector.rightAddCallback(self.moveFocusRight)
-        self.blinkDetector.bothAddCallback(self.pressFocused)
 
     def initialize_speech(self):
         self.speech.commands["video"].append(self.playVideo)
