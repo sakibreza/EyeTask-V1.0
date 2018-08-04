@@ -68,7 +68,7 @@ class MainWindow(QMainWindow):
         info = {}
         if self.current_mode == 0 or self.current_mode == 1 or self.current_mode == 3 or self.current_mode == 4:
             _, img = self.cap.read()
-            blink_dict = self.blinkDetector.run_blink_detector(img)
+            blink_dict = self.blinkDetector.run_blink_detector(img, self.eyeThreshold.value())
             if self.current_mode != 4 or self.current_mode != 2:
                 outImage = toQImage(blink_dict["image"])
                 outImage = outImage.rgbSwapped()

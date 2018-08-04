@@ -37,7 +37,8 @@ class BlinkDetector:
         (self.lStart, self.lEnd) = face_utils.FACIAL_LANDMARKS_IDXS["left_eye"]
         (self.rStart, self.rEnd) = face_utils.FACIAL_LANDMARKS_IDXS["right_eye"]
 
-    def run_blink_detector(self, frame):
+    def run_blink_detector(self, frame, eyeThresh):
+        self.EYE_AR_THRESH = eyeThresh
         retDict = {"eyegaze": None,
                    "both": False,
                    "left": False,
