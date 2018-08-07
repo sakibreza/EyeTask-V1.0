@@ -43,7 +43,7 @@ class MainWindow(QMainWindow):
         # mode 4 = Face mode wheel chair
         self.current_mode = 0
 
-        self.cap = cv2.VideoCapture(1)
+        self.cap = cv2.VideoCapture(0)
 
         self.gazeDetector = GazeDetector()
 
