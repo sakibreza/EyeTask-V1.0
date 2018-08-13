@@ -1,4 +1,4 @@
-package sample;
+package JavaFX;
 
 import py4j.GatewayServer;
 import javafx.application.Application;
