@@ -1,4 +1,4 @@
-package JavaFX;
+package sample;
 
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -10,7 +10,7 @@ import javafx.fxml.FXMLLoader;
 public class EntryPoint {
 
     private GuiController guiController;
-    private int value,timeGap = 5;
+    private int value,timeGap = 10;
 
     //Entry point for py4j server
     public EntryPoint(FXMLLoader fxmlLoader){
@@ -55,6 +55,7 @@ public class EntryPoint {
 
     //-------------------------------------------------
 
+//----------------Initialization-------------
 
     //Initialization of gui elements
     public int init(int Speed,int Max_Speed,int Min_Speed,int Threshold,int Max_Thres,int Min_thres)
@@ -63,6 +64,9 @@ public class EntryPoint {
         return Wrap(cd);
     }
 
+//----------------Focusing-------------
+
+
     //move focused button forward or backward
     public int moveFocus(int direction){
 
@@ -70,19 +74,7 @@ public class EntryPoint {
         return Wrap(cd);
     }
 
-    //Decrease speed of wheelchair
-    public int decreaseSpeed(){
-
-        Command cd = new Command() { public int execute() {return guiController.decreaseSpeed();} };
-        return Wrap(cd);
-    }
-
-    //Decrease Threshold value of eye
-    public int decreaseThres(){
-
-        Command cd = new Command() { public int execute() {return guiController.decreaseThres();} };
-        return Wrap(cd);
-    }
+//----------------Wheelchair-------------
 
     //Increase speed of wheelchair
     public int increaseSpeed(){
@@ -92,11 +84,52 @@ public class EntryPoint {
 
     }
 
+    //Decrease speed of wheelchair
+    public int decreaseSpeed(){
+
+        Command cd = new Command() { public int execute() {return guiController.decreaseSpeed();} };
+        return Wrap(cd);
+    }
+
+//----------------Eye Threshold-------------
+
+    //Decrease Threshold value of eye
+    public int decreaseThres(){
+
+        Command cd = new Command() { public int execute() {return guiController.decreaseThres();} };
+        return Wrap(cd);
+    }
+
     //Increase Threshold value of eye
     public int increaseThres(){
 
         Command cd = new Command() { public int execute() {return guiController.increaseThres();} };
         return Wrap(cd);
     }
+
+//----------------Media-------------
+
+
+    public int selectMedia(){
+        Command cd = new Command() { public int execute() {return guiController.selectMedia();} };
+        return Wrap(cd);
+    }
+    public int go(int Direction)
+    {
+        Command cd = new Command() { public int execute() {return guiController.go(Direction);} };
+        return Wrap(cd);
+    }
+    public void playMedia(){
+
+    }
+
+    public void pauseMedia() {
+
+    }
+
+    public void stopMedia(){
+
+    }
+
 
 }
