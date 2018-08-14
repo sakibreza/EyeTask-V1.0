@@ -1,24 +1,33 @@
-package JavaFX;
+package sample;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuButton;
+import javafx.scene.control.MenuItem;
 
 public class GuiController {
 
     @FXML
-    private Button speedIncrease,speedDecrease,thresIncrease,thresDecrease; //Instances of buttons
+    private Button speedIncrease,speedDecrease,thresIncrease,thresDecrease,buttonPlay,buttonPause,buttonStop; //Instances of buttons
+
+    @FXML
+    private MenuButton buttonMedia;
+    @FXML
+    private MenuItem item1,item2;
 
     private Button[] guiButtons; //Array of buttons
 
     @FXML
     private Label speedValue,thresValue; //Label Parameters
 
-    private int Speed,Threshold,no_of_buttons = 4;//Value of Label Parameters
+    private int Speed,Threshold,no_of_buttons = 8;//Value of Label Parameters
 
     private int Max_Speed,Min_Speed,Max_Thres,Min_Thres;//Minimum and Maximum values of parameters
 
     private int buttonFocused = 0;//Current focused button
+
+    //----------------Initialization-------------
 
     //Initialization of gui elements
     public int init(int Speed,int Max_Speed,int Min_Speed,int Threshold,int Max_Thres,int Min_thres)
@@ -29,6 +38,9 @@ public class GuiController {
         guiButtons[1] = speedDecrease;
         guiButtons[2] = thresIncrease;
         guiButtons[3] = thresDecrease;
+        guiButtons[5] = buttonPlay;
+        guiButtons[6] = buttonPause;
+        guiButtons[7] = buttonStop;
 
         //Set parameters value
         this.Speed = Speed;
@@ -48,6 +60,8 @@ public class GuiController {
 
 
     }
+
+    //----------------Focusing Button-------------
 
     //move button focus forward or backward
     @FXML
@@ -76,24 +90,7 @@ public class GuiController {
 
     }
 
-    //Decrease speed of wheelchair
-    @FXML
-    public int decreaseSpeed() {
-
-        Speed = (Speed - 1 < Min_Speed)?Speed:Speed-1;
-        speedValue.setText(Speed+"");
-        return Speed;//return speed of wheelchair
-    }
-
-    //Decrease Threshold value of eye
-    @FXML
-    public int decreaseThres() {
-
-        Threshold = (Threshold - 1 < Min_Thres)?Threshold:Threshold-1;
-        thresValue.setText(Threshold+"");
-        return  Threshold;//return Threshold value of eye
-
-    }
+    //----------------Wheel Chair-------------
 
     //Increase speed of wheelchair
     @FXML
@@ -105,6 +102,27 @@ public class GuiController {
 
     }
 
+    //Decrease speed of wheelchair
+    @FXML
+    public int decreaseSpeed() {
+
+        Speed = (Speed - 1 < Min_Speed)?Speed:Speed-1;
+        speedValue.setText(Speed+"");
+        return Speed;//return speed of wheelchair
+    }
+
+    //----------------Eye Threshold-------------
+
+    //Decrease Threshold value of eye
+    @FXML
+    public int decreaseThres() {
+
+        Threshold = (Threshold - 1 < Min_Thres)?Threshold:Threshold-1;
+        thresValue.setText(Threshold+"");
+        return  Threshold;//return Threshold value of eye
+
+    }
+
     //Increase Threshold value of eye
     @FXML
     public int increaseThres() {
@@ -112,6 +130,37 @@ public class GuiController {
         Threshold = (Threshold + 1 > Max_Thres)?Threshold:Threshold+1;
         thresValue.setText(Threshold+"");
         return  Threshold;//return Threshold value of eye
+
+    }
+
+    //----------------Media-------------
+
+    @FXML
+    public int selectMedia(){
+        buttonMedia.fire();
+        item1.setStyle("-fx-background-color:#c3d0e5");
+        return 0;
+    }
+
+    public int go(int Direction)
+    {
+        item1.setStyle("-fx-background-color:white");
+        item2.setStyle("-fx-background-color:#c3d0e5");
+        return 0;
+    }
+
+    @FXML
+    public void playMedia(){
+
+    }
+
+    @FXML
+    public void pauseMedia() {
+
+    }
+
+    @FXML
+    public void stopMedia(){
 
     }
 
