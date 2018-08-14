@@ -12,13 +12,20 @@ public class EntryPoint {
     private GuiController guiController;
     private int value,timeGap = 5;
 
-
     //Entry point for py4j server
     public EntryPoint(FXMLLoader fxmlLoader){
 
         guiController = fxmlLoader.getController();
 
     }
+
+    //---------------------------------------------
+
+    //Command interface for executing function
+    public interface Command{
+        int execute();
+    }
+
 
     //Wait for thread to complete
     public void Wait(){
@@ -39,16 +46,14 @@ public class EntryPoint {
                 value = func.execute();
             }
         });
-        
+
         Wait();
         return value;
 
     }
 
-    //Command interface for executing function
-    public interface Command{
-         int execute();
-    }
+
+    //-------------------------------------------------
 
 
     //Initialization of gui elements
