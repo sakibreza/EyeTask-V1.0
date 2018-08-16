@@ -54,5 +54,7 @@ class Speach:
             print(response["transcription"])
             for func in self.commands["stop"]:
                 func()
+            #for func in self.commands["close"]:
+                #func()
 
         return response

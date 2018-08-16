@@ -64,6 +64,8 @@ class MainWindow(QMainWindow):
         self.blinkDetector.reset()
 
     def updateFrame(self):
+        #print(self.current_mode)
+	
         info = {}
         if self.current_mode == 0 or self.current_mode == 1 or self.current_mode == 3 or self.current_mode == 4:
             _, img = self.cap.read()
@@ -78,12 +80,12 @@ class MainWindow(QMainWindow):
             info["rightEAR"] = blink_dict["rightEAR"]
             info["leftEAR"] = blink_dict["leftEAR"]
             info["avgEAR"] = (blink_dict["rightEAR"] + blink_dict["leftEAR"]) / 2
-
+            flag = 0
             if blink_dict["both"]:
                 if self.current_subprecess is not None:
                     self.current_subprecess.terminate()
                     self.current_subprecess = None
-
+                    flag = 1
             if self.current_subprecess is not None:
                 return
             if self.current_mode is 0:
@@ -91,7 +93,7 @@ class MainWindow(QMainWindow):
                     self.moveFocusLeft()
                 if blink_dict["right"]:
                     self.moveFocusRight()
-                if blink_dict["both"]:
+                if blink_dict["both"] and flag == 0:
                     self.pressFocused()
 
             elif self.current_mode is 1:
@@ -118,7 +120,7 @@ class MainWindow(QMainWindow):
                 if blink_dict["right"]:
                     self.faceDetector.initPos(faceDict["face"])
 
-                if blink_dict["both"]:
+                if blink_dict["both"] and flag == 0:
                     self.pressFocused()
 
                 if faceDict["direction"] == "right":
@@ -184,6 +186,7 @@ class MainWindow(QMainWindow):
 
         self.speech.commands["close"].append(self.stopCurrentSubprocess)
 
+
     def stopCurrentSubprocess(self):
         if self.current_subprecess is not None:
             self.current_subprecess.terminate()
@@ -231,10 +234,10 @@ class MainWindow(QMainWindow):
         try:
             url = 'https://api2.onnorokomsms.com/sendsms.asmx?WSDL'
             client = Client(url)
-            userName = '01516111574'
-            password = '54124'
+            userName = '01521313223'
+            password = '90053'
             recipientNumber = '01521323429'
-            smsText = 'Hello Eygaze'
+            smsText = 'Help Me'
             smsType = 'TEXT'
             maskName = ''
             campaignName = ''
